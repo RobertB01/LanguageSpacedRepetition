@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -763,9 +763,18 @@ input[type=range]::-webkit-slider-thumb {
   .rating-btns { gap: 5px; }
   .rating-btn { padding: 10px 4px; font-size: 0.75rem; }
 }
+/* ── Toast notifications ── */
+#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: #161b22; border: 1px solid #30363d; color: #e6edf3; padding: 12px 18px; border-radius: 8px; font-size: 0.875rem; box-shadow: 0 4px 16px rgba(0,0,0,0.5); animation: toastIn 0.25s ease; max-width: 320px; }
+.toast.toast-success { border-color: #3fb950; }
+.toast.toast-error   { border-color: #f85149; }
+.toast.toast-out     { animation: toastOut 0.3s ease forwards; }
+@keyframes toastIn  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(12px); } }
 </style>
 </head>
 <body>
+<div id="toast-container"></div>
 
 <!-- ═══════════════════════════════ STUDY SCREEN ═══════════════════════════════ -->
 <div id="screen-study" class="screen active">
@@ -1518,7 +1527,7 @@ function markStudiedToday() {
     gs.lastStudyDate = today;
     // Add to review history (will update counts as we go)
     const existing = gs.reviewHistory.find(r => r.date === today);
-    if (!existing) gs.reviewHistory.push({ date: today, correct: 0, total: 0 });
+    if (!existing) gs.reviewHistory.push({ date: today, correct: 0, total: 0, newWords: 0 });
     if (gs.reviewHistory.length > 60) gs.reviewHistory = gs.reviewHistory.slice(-60);
   }
 }
@@ -2084,9 +2093,9 @@ function importProgress(input) {
       pData = imported;
       saveProgress();
       renderSettings();
-      alert('Progress imported successfully!');
+      showToast('Progress imported successfully!', 'success');
     } catch (_) {
-      alert('Invalid JSON file.');
+      showToast('Invalid JSON file.', 'error');
     }
   };
   reader.readAsText(file);
@@ -2099,11 +2108,23 @@ function resetProgress() {
     saveProgress();
     buildQueue();
     showScreen('study');
-    alert('Progress reset.');
+    showToast('Progress reset.', 'success');
   }
 }
 
 // ═══════════════════════════ HELPERS ═══════════════════════════
+function showToast(msg, type = 'success', duration = 3000) {
+  const tc = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  tc.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('toast-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }, duration);
+}
+
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
