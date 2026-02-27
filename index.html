@@ -2128,9 +2128,6 @@ function showToast(msg, type = 'success', duration = 3000) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-function escAttr(s) {
-  return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
-}
 function normalizeStr(s) {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 }
@@ -2169,13 +2166,6 @@ document.addEventListener('keydown', (e) => {
       else if (e.key === '4') rateCard(3);
     }
     if (e.key === 'Escape') showScreen('dashboard');
-  }
-});
-
-// Space in production input
-document.addEventListener('keydown', (e) => {
-  if (e.target.id === 'prod-input' && e.code === 'Space' && sState.cardState === 'front') {
-    // allow normal space typing in input — do nothing here
   }
 });
 
