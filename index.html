@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpanishSRS - Learn Spanish Vocabulary</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --card-bg: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-sec: #8b949e;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --blue: #58a6ff;
+  --orange: #e3b341;
+  --purple: #bc8cff;
+  --teal: #39d353;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+a { color: var(--blue); text-decoration: none; }
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  outline: none;
+  transition: all 0.15s ease;
+}
+button:active { transform: scale(0.97); }
+input, textarea, select {
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-size: 1rem;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--blue); }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── NAV ── */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.nav-actions { display: flex; gap: 8px; }
+.nav-btn {
+  background: transparent;
+  color: var(--text-sec);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.nav-btn:hover { color: var(--text); border-color: var(--text-sec); background: rgba(255,255,255,0.05); }
+
+/* ── STUDY SCREEN ── */
+.study-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* Progress */
+.progress-section { margin-bottom: 20px; }
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  color: var(--text-sec);
+}
+.progress-meta .streak { color: var(--orange); font-weight: 600; }
+.progress-bar-wrap {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Card */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  animation: fadeInCard 0.3s ease;
+}
+@keyframes fadeInCard {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.rank-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.type-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.type-noun     { background: rgba(88,166,255,0.15); color: var(--blue); }
+.type-verb     { background: rgba(63,185,80,0.15);  color: var(--green); }
+.type-adjective{ background: rgba(227,179,65,0.15); color: var(--orange); }
+.type-adverb   { background: rgba(188,140,255,0.15);color: var(--purple); }
+.type-pronoun  { background: rgba(57,211,83,0.15);  color: var(--teal); }
+.type-preposition, .type-conjunction, .type-article, .type-numeral, .type-interjection {
+  background: rgba(139,148,158,0.15); color: var(--text-sec);
+}
+.gender-tag {
+  font-size: 0.7rem;
+  color: var(--text-sec);
+  margin-left: 6px;
+  font-style: italic;
+}
+
+/* Front of card */
+.card-word-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.card-word {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--text);
+  line-height: 1.1;
+}
+.sound-btn {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-sec);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.sound-btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+.mode-prompt {
+  font-size: 0.88rem;
+  color: var(--text-sec);
+  margin-bottom: 20px;
+}
+
+/* Production mode */
+.prod-english {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.prod-hint { font-size: 0.82rem; color: var(--text-sec); margin-bottom: 16px; }
+.prod-input-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.prod-input {
+  flex: 1;
+  font-size: 1.1rem;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+}
+.prod-input:focus { border-color: var(--blue); }
+.prod-input.correct { border-color: var(--green); background: rgba(63,185,80,0.08); }
+.prod-input.incorrect { border-color: var(--red); background: rgba(248,81,73,0.08); }
+.check-btn {
+  background: var(--blue);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.check-btn:hover { background: #79b8ff; }
+
+/* Answer section */
+.answer-section {
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+  padding-top: 18px;
+  animation: fadeInCard 0.25s ease;
+}
+.answer-english {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.correct-answer-note {
+  font-size: 0.85rem;
+  color: var(--text-sec);
+  margin-bottom: 4px;
+}
+.correct-answer-word {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--green);
+  margin-bottom: 14px;
+}
+.example-block {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.example-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-sec);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.example-sentence {
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.example-sentence .hl { color: var(--green); font-weight: 600; }
+.example-translation {
+  font-size: 0.88rem;
+  color: var(--text-sec);
+  font-style: italic;
+}
+.sentence-sound-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+.sentence-sound-btn {
+  background: transparent;
+  color: var(--text-sec);
+  font-size: 0.82rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.sentence-sound-btn:hover { color: var(--blue); background: rgba(88,166,255,0.1); }
+
+/* Reveal / Check result banner */
+.result-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+.result-banner.correct-banner { background: rgba(63,185,80,0.12); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+.result-banner.incorrect-banner { background: rgba(248,81,73,0.12); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+
+/* Rating buttons */
+.rating-section { margin-top: 22px; }
+.rating-label {
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  text-align: center;
+  margin-bottom: 10px;
+}
+.rating-btns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rating-btn {
+  padding: 12px 6px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 2px solid transparent;
+}
+.rating-btn .rb-key {
+  font-size: 0.7rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+.rating-btn.rb-again { background: rgba(248,81,73,0.15); color: var(--red); border-color: rgba(248,81,73,0.3); }
+.rating-btn.rb-again:hover { background: rgba(248,81,73,0.28); }
+.rating-btn.rb-hard  { background: rgba(227,179,65,0.15); color: var(--orange); border-color: rgba(227,179,65,0.3); }
+.rating-btn.rb-hard:hover  { background: rgba(227,179,65,0.28); }
+.rating-btn.rb-good  { background: rgba(63,185,80,0.15); color: var(--green); border-color: rgba(63,185,80,0.3); }
+.rating-btn.rb-good:hover  { background: rgba(63,185,80,0.28); }
+.rating-btn.rb-easy  { background: rgba(88,166,255,0.15); color: var(--blue); border-color: rgba(88,166,255,0.3); }
+.rating-btn.rb-easy:hover  { background: rgba(88,166,255,0.28); }
+
+/* Reveal button */
+.reveal-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--blue);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 20px;
+}
+.reveal-btn:hover { background: #79b8ff; }
+.reveal-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-sec);
+  margin-top: 8px;
+}
+
+/* Caught up card */
+.caught-up-card {
+  text-align: center;
+  padding: 60px 20px;
+}
+.caught-up-icon { font-size: 4rem; margin-bottom: 16px; }
+.caught-up-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }
+.caught-up-sub { color: var(--text-sec); margin-bottom: 28px; }
+.caught-up-stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.caught-up-stat { text-align: center; }
+.caught-up-stat-num { font-size: 1.8rem; font-weight: 700; color: var(--blue); }
+.caught-up-stat-label { font-size: 0.8rem; color: var(--text-sec); }
+.study-anyway-btn {
+  background: rgba(88,166,255,0.15);
+  color: var(--blue);
+  border: 1px solid rgba(88,166,255,0.4);
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.study-anyway-btn:hover { background: rgba(88,166,255,0.28); }
+
+/* ── DASHBOARD SCREEN ── */
+.dash-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 16px 60px;
+}
+.dash-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-sec);
+  margin-bottom: 12px;
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (min-width: 480px) {
+  .stat-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-num { font-size: 1.6rem; font-weight: 700; margin-bottom: 2px; }
+.stat-lbl { font-size: 0.75rem; color: var(--text-sec); }
+.stat-new      { color: var(--text-sec); }
+.stat-learning { color: var(--yellow); }
+.stat-review   { color: var(--blue); }
+.stat-mastered { color: var(--green); }
+
+.word-progress-bars { margin-bottom: 28px; }
+.wpb-row { margin-bottom: 14px; }
+.wpb-meta { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px; }
+.wpb-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.wpb-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+.today-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.today-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+.today-num { font-size: 1.4rem; font-weight: 700; color: var(--blue); }
+.today-lbl { font-size: 0.75rem; color: var(--text-sec); }
+
+.streak-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.streak-icon { font-size: 2.4rem; }
+.streak-num { font-size: 2rem; font-weight: 700; color: var(--orange); }
+.streak-label { font-size: 0.82rem; color: var(--text-sec); }
+
+.due-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.due-chip {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+}
+.due-chip-num { font-size: 1.3rem; font-weight: 700; display: block; }
+.due-now .due-chip-num { color: var(--red); }
+.due-tmr .due-chip-num { color: var(--yellow); }
+
+/* Accuracy chart */
+.chart-section { margin-bottom: 28px; }
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 90px;
+  padding-bottom: 24px;
+  position: relative;
+}
+.chart-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+.chart-bar {
+  width: 100%;
+  background: rgba(88,166,255,0.3);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.4s ease;
+  min-height: 2px;
+}
+.chart-bar.has-data { background: var(--blue); }
+.chart-day {
+  position: absolute;
+  bottom: 0;
+  font-size: 0.65rem;
+  color: var(--text-sec);
+  white-space: nowrap;
+}
+.chart-pct {
+  position: absolute;
+  top: -18px;
+  font-size: 0.65rem;
+  color: var(--text-sec);
+  white-space: nowrap;
+}
+
+/* Struggled words */
+.struggled-list { margin-bottom: 28px; }
+.struggled-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+.struggled-word { font-weight: 600; font-size: 1.05rem; }
+.struggled-en { font-size: 0.82rem; color: var(--text-sec); }
+.ease-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(248,81,73,0.15);
+  color: var(--red);
+}
+
+.start-study-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--green);
+  color: #0d1117;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.start-study-btn:hover { background: #56d364; }
+
+/* ── SETTINGS SCREEN ── */
+.settings-container {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 28px 16px 60px;
+}
+.settings-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 28px; }
+.setting-group {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 0.95rem; font-weight: 500; }
+.setting-desc { font-size: 0.78rem; color: var(--text-sec); margin-top: 2px; }
+
+/* Toggle */
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--green); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* Range slider */
+.range-wrap { display: flex; align-items: center; gap: 12px; }
+.range-val { font-size: 0.9rem; font-weight: 600; color: var(--blue); min-width: 24px; text-align: right; }
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  border: none;
+  padding: 0;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; height: 16px;
+  background: var(--blue);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Segmented control */
+.seg-ctrl {
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.seg-btn {
+  background: transparent;
+  color: var(--text-sec);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-right: 1px solid var(--border);
+}
+.seg-btn:last-child { border-right: none; }
+.seg-btn.active { background: var(--blue); color: #fff; }
+.seg-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--text); }
+
+.export-btn, .import-btn, .reset-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.export-btn { background: rgba(88,166,255,0.15); color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
+.export-btn:hover { background: rgba(88,166,255,0.28); }
+.import-btn { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+.import-btn:hover { background: rgba(63,185,80,0.28); }
+.reset-btn { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+.reset-btn:hover { background: rgba(248,81,73,0.28); }
+#import-file-input { display: none; }
+.back-btn {
+  background: transparent;
+  color: var(--text-sec);
+  font-size: 0.88rem;
+  padding: 6px 0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.back-btn:hover { color: var(--text); }
+
+/* ── SESSION SUMMARY MODAL ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 16px;
+  display: none;
+}
+.modal-backdrop.open { display: flex; animation: fadeInBg 0.2s ease; }
+@keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  max-width: 420px;
+  width: 100%;
+  animation: fadeInCard 0.25s ease;
+}
+.modal-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 0.88rem; color: var(--text-sec); margin-bottom: 24px; }
+.modal-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.modal-stat {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+.modal-stat-num { font-size: 1.5rem; font-weight: 700; color: var(--blue); }
+.modal-stat-lbl { font-size: 0.75rem; color: var(--text-sec); }
+.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.modal-continue-btn {
+  flex: 1;
+  padding: 13px;
+  background: var(--green);
+  color: #0d1117;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.modal-continue-btn:hover { background: #56d364; }
+.modal-dash-btn {
+  flex: 1;
+  padding: 13px;
+  background: rgba(88,166,255,0.15);
+  color: var(--blue);
+  border: 1px solid rgba(88,166,255,0.3);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.modal-dash-btn:hover { background: rgba(88,166,255,0.28); }
+
+/* Misc */
+.empty-msg { text-align: center; color: var(--text-sec); padding: 16px; font-size: 0.88rem; }
+.hidden { display: none !important; }
+
+@media (max-width: 360px) {
+  .card { padding: 20px 16px; }
+  .card-word { font-size: 2rem; }
+  .rating-btns { gap: 5px; }
+  .rating-btn { padding: 10px 4px; font-size: 0.75rem; }
+}
+/* ── Toast notifications ── */
+#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: #161b22; border: 1px solid #30363d; color: #e6edf3; padding: 12px 18px; border-radius: 8px; font-size: 0.875rem; box-shadow: 0 4px 16px rgba(0,0,0,0.5); animation: toastIn 0.25s ease; max-width: 320px; }
+.toast.toast-success { border-color: #3fb950; }
+.toast.toast-error   { border-color: #f85149; }
+.toast.toast-out     { animation: toastOut 0.3s ease forwards; }
+@keyframes toastIn  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(12px); } }
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════ STUDY SCREEN ═══════════════════════════════ -->
+<div id="screen-study" class="screen active">
+  <nav class="nav">
+    <div class="nav-brand">🇪🇸 SpanishSRS</div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="showScreen('dashboard')">📊 Stats</button>
+      <button class="nav-btn" onclick="showScreen('settings')">⚙️ Settings</button>
+    </div>
+  </nav>
+
+  <div class="study-container">
+    <!-- Progress -->
+    <div class="progress-section">
+      <div class="progress-meta">
+        <span id="progress-text">Card 0 of 0</span>
+        <span id="accuracy-text">Accuracy: —</span>
+        <span id="streak-text" class="streak"></span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Card area -->
+    <div id="card-area">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DASHBOARD SCREEN ═══════════════════════════ -->
+<div id="screen-dashboard" class="screen">
+  <nav class="nav">
+    <div class="nav-brand">🇪🇸 SpanishSRS</div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="showScreen('study')">📖 Study</button>
+      <button class="nav-btn" onclick="showScreen('settings')">⚙️ Settings</button>
+    </div>
+  </nav>
+  <div class="dash-container">
+    <div class="dash-title">📊 Dashboard</div>
+    <div id="dash-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SETTINGS SCREEN ══════════════════════════════ -->
+<div id="screen-settings" class="screen">
+  <nav class="nav">
+    <div class="nav-brand">🇪🇸 SpanishSRS</div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="showScreen('study')">📖 Study</button>
+      <button class="nav-btn" onclick="showScreen('dashboard')">📊 Stats</button>
+    </div>
+  </nav>
+  <div class="settings-container">
+    <div class="settings-title">⚙️ Settings</div>
+
+    <p class="section-title">Study</p>
+    <div class="setting-group">
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">New cards per session</div>
+          <div class="setting-desc">How many new words to introduce each session</div>
+        </div>
+        <div class="range-wrap">
+          <input type="range" id="setting-new-cards" min="5" max="30" step="1" value="10"
+            oninput="document.getElementById('new-cards-val').textContent=this.value;saveSetting('newCardsPerSession',+this.value)">
+          <div class="range-val" id="new-cards-val">10</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Study mode</div>
+          <div class="setting-desc">Recognition, Production, or Mixed</div>
+        </div>
+        <div class="seg-ctrl" id="seg-mode">
+          <button class="seg-btn" onclick="setStudyMode('recognition',this)">Recognition</button>
+          <button class="seg-btn active" onclick="setStudyMode('production',this)">Production</button>
+          <button class="seg-btn" onclick="setStudyMode('mixed',this)">Mixed</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-title">Audio</p>
+    <div class="setting-group">
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Auto-pronounce</div>
+          <div class="setting-desc">Play audio when a card appears</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="setting-auto-pronounce" checked onchange="saveSetting('autoPronounce',this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Speech speed</div>
+          <div class="setting-desc">Speed of text-to-speech</div>
+        </div>
+        <div class="seg-ctrl" id="seg-speed">
+          <button class="seg-btn" onclick="setSpeechSpeed('slow',this)">Slow</button>
+          <button class="seg-btn active" onclick="setSpeechSpeed('normal',this)">Normal</button>
+          <button class="seg-btn" onclick="setSpeechSpeed('fast',this)">Fast</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-title">Data</p>
+    <div class="setting-group">
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Export progress</div>
+          <div class="setting-desc">Download your progress as JSON</div>
+        </div>
+        <button class="export-btn" onclick="exportProgress()">⬇ Export</button>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Import progress</div>
+          <div class="setting-desc">Restore from a JSON backup</div>
+        </div>
+        <button class="import-btn" onclick="document.getElementById('import-file-input').click()">⬆ Import</button>
+        <input type="file" id="import-file-input" accept=".json" onchange="importProgress(this)">
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Reset progress</div>
+          <div class="setting-desc">Clear all data and start over</div>
+        </div>
+        <button class="reset-btn" onclick="resetProgress()">⚠ Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SESSION SUMMARY MODAL ════════════════════════ -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="session-modal">
+    <div class="modal-title">🎉 Session Complete!</div>
+    <div class="modal-sub" id="modal-sub-text">Great work today.</div>
+    <div class="modal-stats" id="modal-stats"></div>
+    <div class="modal-actions">
+      <button class="modal-continue-btn" onclick="restartSession()">Study More</button>
+      <button class="modal-dash-btn" onclick="closeModalAndDash()">View Stats</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════ VOCAB DATA ═══════════════════════════
+const VOCAB_DATA = [
+  {id:1,spanish:`de`,english:`of/from`,exampleSentence:`Vengo de España.`,exampleTranslation:`I come from Spain.`,type:"preposition",gender:null,rank:1},
+  {id:2,spanish:`la`,english:`the (f)`,exampleSentence:`La casa es muy grande.`,exampleTranslation:`The house is very big.`,type:"article",gender:null,rank:2},
+  {id:3,spanish:`que`,english:`that/which`,exampleSentence:`Creo que tienes razón.`,exampleTranslation:`I believe you are right.`,type:"conjunction",gender:null,rank:3},
+  {id:4,spanish:`el`,english:`the (m)`,exampleSentence:`El libro está sobre la mesa.`,exampleTranslation:`The book is on the table.`,type:"article",gender:null,rank:4},
+  {id:5,spanish:`en`,english:`in/on`,exampleSentence:`Vivo en una ciudad pequeña.`,exampleTranslation:`I live in a small city.`,type:"preposition",gender:null,rank:5},
+  {id:6,spanish:`y`,english:`and`,exampleSentence:`Tengo un hermano y una hermana.`,exampleTranslation:`I have a brother and a sister.`,type:"conjunction",gender:null,rank:6},
+  {id:7,spanish:`a`,english:`to/at`,exampleSentence:`Voy a la escuela cada día.`,exampleTranslation:`I go to school every day.`,type:"preposition",gender:null,rank:7},
+  {id:8,spanish:`los`,english:`the (m pl)`,exampleSentence:`Los niños juegan en el parque.`,exampleTranslation:`The children play in the park.`,type:"article",gender:null,rank:8},
+  {id:9,spanish:`se`,english:`himself/herself`,exampleSentence:`Ella se llama María.`,exampleTranslation:`Her name is María.`,type:"pronoun",gender:null,rank:9},
+  {id:10,spanish:`del`,english:`of the`,exampleSentence:`El presidente del país habló ayer.`,exampleTranslation:`The president of the country spoke yesterday.`,type:"preposition",gender:null,rank:10},
+  {id:11,spanish:`las`,english:`the (f pl)`,exampleSentence:`Las flores son muy bonitas.`,exampleTranslation:`The flowers are very pretty.`,type:"article",gender:null,rank:11},
+  {id:12,spanish:`un`,english:`a/an (m)`,exampleSentence:`Tengo un perro en casa.`,exampleTranslation:`I have a dog at home.`,type:"article",gender:null,rank:12},
+  {id:13,spanish:`por`,english:`by/for/through`,exampleSentence:`Gracias por tu ayuda.`,exampleTranslation:`Thank you for your help.`,type:"preposition",gender:null,rank:13},
+  {id:14,spanish:`con`,english:`with`,exampleSentence:`Quiero un café con leche.`,exampleTranslation:`I want a coffee with milk.`,type:"preposition",gender:null,rank:14},
+  {id:15,spanish:`no`,english:`no/not`,exampleSentence:`No tengo tiempo hoy.`,exampleTranslation:`I don't have time today.`,type:"adverb",gender:null,rank:15},
+  {id:16,spanish:`una`,english:`a/an (f)`,exampleSentence:`Quiero una manzana, por favor.`,exampleTranslation:`I want an apple, please.`,type:"article",gender:null,rank:16},
+  {id:17,spanish:`su`,english:`his/her/its`,exampleSentence:`¿Cómo se llama su madre?`,exampleTranslation:`What is his/her mother's name?`,type:"adjective",gender:null,rank:17},
+  {id:18,spanish:`para`,english:`for/in order to`,exampleSentence:`Esto es para ti.`,exampleTranslation:`This is for you.`,type:"preposition",gender:null,rank:18},
+  {id:19,spanish:`es`,english:`is`,exampleSentence:`Madrid es la capital de España.`,exampleTranslation:`Madrid is the capital of Spain.`,type:"verb",gender:null,rank:19},
+  {id:20,spanish:`al`,english:`to the`,exampleSentence:`Voy al mercado cada semana.`,exampleTranslation:`I go to the market every week.`,type:"preposition",gender:null,rank:20},
+  {id:21,spanish:`lo`,english:`it/the (neuter)`,exampleSentence:`No lo entiendo bien.`,exampleTranslation:`I don't understand it well.`,type:"pronoun",gender:null,rank:21},
+  {id:22,spanish:`como`,english:`as/like/how`,exampleSentence:`Canta como un ángel.`,exampleTranslation:`She sings like an angel.`,type:"conjunction",gender:null,rank:22},
+  {id:23,spanish:`más`,english:`more`,exampleSentence:`Necesito más tiempo para estudiar.`,exampleTranslation:`I need more time to study.`,type:"adverb",gender:null,rank:23},
+  {id:24,spanish:`pero`,english:`but`,exampleSentence:`Me gusta, pero es muy caro.`,exampleTranslation:`I like it, but it's very expensive.`,type:"conjunction",gender:null,rank:24},
+  {id:25,spanish:`sus`,english:`his/her/their`,exampleSentence:`Guarda sus libros en la mochila.`,exampleTranslation:`He keeps his books in the backpack.`,type:"adjective",gender:null,rank:25},
+  {id:26,spanish:`le`,english:`to him/her`,exampleSentence:`Le doy un regalo a mi amiga.`,exampleTranslation:`I give a gift to my friend.`,type:"pronoun",gender:null,rank:26},
+  {id:27,spanish:`ya`,english:`already/now`,exampleSentence:`Ya terminé mi tarea.`,exampleTranslation:`I already finished my homework.`,type:"adverb",gender:null,rank:27},
+  {id:28,spanish:`o`,english:`or`,exampleSentence:`¿Quieres té o café?`,exampleTranslation:`Do you want tea or coffee?`,type:"conjunction",gender:null,rank:28},
+  {id:29,spanish:`este`,english:`this (m)`,exampleSentence:`Este libro es muy interesante.`,exampleTranslation:`This book is very interesting.`,type:"adjective",gender:null,rank:29},
+  {id:30,spanish:`sí`,english:`yes`,exampleSentence:`Sí, me gustaría ir contigo.`,exampleTranslation:`Yes, I would like to go with you.`,type:"adverb",gender:null,rank:30},
+  {id:31,spanish:`porque`,english:`because`,exampleSentence:`No fui porque estaba enfermo.`,exampleTranslation:`I didn't go because I was sick.`,type:"conjunction",gender:null,rank:31},
+  {id:32,spanish:`esta`,english:`this (f)`,exampleSentence:`Esta ciudad es muy bonita.`,exampleTranslation:`This city is very beautiful.`,type:"adjective",gender:null,rank:32},
+  {id:33,spanish:`entre`,english:`between`,exampleSentence:`Hay un río entre los dos pueblos.`,exampleTranslation:`There is a river between the two towns.`,type:"preposition",gender:null,rank:33},
+  {id:34,spanish:`cuando`,english:`when`,exampleSentence:`Te llamo cuando llegue.`,exampleTranslation:`I'll call you when I arrive.`,type:"conjunction",gender:null,rank:34},
+  {id:35,spanish:`muy`,english:`very`,exampleSentence:`El examen fue muy difícil.`,exampleTranslation:`The exam was very difficult.`,type:"adverb",gender:null,rank:35},
+  {id:36,spanish:`sin`,english:`without`,exampleSentence:`No puedo vivir sin música.`,exampleTranslation:`I can't live without music.`,type:"preposition",gender:null,rank:36},
+  {id:37,spanish:`sobre`,english:`about/on/over`,exampleSentence:`El libro está sobre la mesa.`,exampleTranslation:`The book is on the table.`,type:"preposition",gender:null,rank:37},
+  {id:38,spanish:`también`,english:`also`,exampleSentence:`Yo también quiero ir.`,exampleTranslation:`I also want to go.`,type:"adverb",gender:null,rank:38},
+  {id:39,spanish:`me`,english:`me/myself`,exampleSentence:`Me alegra verte de nuevo.`,exampleTranslation:`I'm glad to see you again.`,type:"pronoun",gender:null,rank:39},
+  {id:40,spanish:`hasta`,english:`until/up to`,exampleSentence:`Trabajé hasta las diez de la noche.`,exampleTranslation:`I worked until ten at night.`,type:"preposition",gender:null,rank:40},
+  {id:41,spanish:`hay`,english:`there is/are`,exampleSentence:`Hay muchos estudiantes en la clase.`,exampleTranslation:`There are many students in the class.`,type:"verb",gender:null,rank:41},
+  {id:42,spanish:`donde`,english:`where`,exampleSentence:`¿Sabes dónde vive Ana?`,exampleTranslation:`Do you know where Ana lives?`,type:"adverb",gender:null,rank:42},
+  {id:43,spanish:`bien`,english:`well`,exampleSentence:`Todo está bien ahora.`,exampleTranslation:`Everything is fine now.`,type:"adverb",gender:null,rank:43},
+  {id:44,spanish:`desde`,english:`from/since`,exampleSentence:`Vivo aquí desde hace cinco años.`,exampleTranslation:`I have lived here for five years.`,type:"preposition",gender:null,rank:44},
+  {id:45,spanish:`todo`,english:`all/everything`,exampleSentence:`Lo sé todo sobre ese tema.`,exampleTranslation:`I know everything about that topic.`,type:"adjective",gender:null,rank:45},
+  {id:46,spanish:`nos`,english:`us/ourselves`,exampleSentence:`Nos vemos mañana en la oficina.`,exampleTranslation:`We'll see each other tomorrow at the office.`,type:"pronoun",gender:null,rank:46},
+  {id:47,spanish:`durante`,english:`during`,exampleSentence:`Dormí durante el vuelo.`,exampleTranslation:`I slept during the flight.`,type:"preposition",gender:null,rank:47},
+  {id:48,spanish:`todos`,english:`all/everyone`,exampleSentence:`Todos los estudiantes aprobaron.`,exampleTranslation:`All the students passed.`,type:"adjective",gender:null,rank:48},
+  {id:49,spanish:`uno`,english:`one`,exampleSentence:`Uno más uno son dos.`,exampleTranslation:`One plus one is two.`,type:"numeral",gender:null,rank:49},
+  {id:50,spanish:`les`,english:`to them`,exampleSentence:`Les dije la verdad a mis padres.`,exampleTranslation:`I told my parents the truth.`,type:"pronoun",gender:null,rank:50},
+  {id:51,spanish:`ni`,english:`neither/nor`,exampleSentence:`No tengo ni dinero ni tiempo.`,exampleTranslation:`I have neither money nor time.`,type:"conjunction",gender:null,rank:51},
+  {id:52,spanish:`ellos`,english:`they (m)`,exampleSentence:`Ellos viven en Buenos Aires.`,exampleTranslation:`They live in Buenos Aires.`,type:"pronoun",gender:null,rank:52},
+  {id:53,spanish:`ellas`,english:`they (f)`,exampleSentence:`Ellas son muy inteligentes.`,exampleTranslation:`They are very intelligent.`,type:"pronoun",gender:null,rank:53},
+  {id:54,spanish:`yo`,english:`I`,exampleSentence:`Yo estudio español todos los días.`,exampleTranslation:`I study Spanish every day.`,type:"pronoun",gender:null,rank:54},
+  {id:55,spanish:`tú`,english:`you (informal)`,exampleSentence:`¿Tú hablas inglés?`,exampleTranslation:`Do you speak English?`,type:"pronoun",gender:null,rank:55},
+  {id:56,spanish:`él`,english:`he`,exampleSentence:`Él trabaja en un hospital.`,exampleTranslation:`He works in a hospital.`,type:"pronoun",gender:null,rank:56},
+  {id:57,spanish:`ella`,english:`she`,exampleSentence:`Ella es profesora de matemáticas.`,exampleTranslation:`She is a math teacher.`,type:"pronoun",gender:null,rank:57},
+  {id:58,spanish:`nosotros`,english:`we`,exampleSentence:`Nosotros vivimos juntos.`,exampleTranslation:`We live together.`,type:"pronoun",gender:null,rank:58},
+  {id:59,spanish:`vosotros`,english:`you all`,exampleSentence:`¿Vosotros venís a la fiesta?`,exampleTranslation:`Are you all coming to the party?`,type:"pronoun",gender:null,rank:59},
+  {id:60,spanish:`eso`,english:`that (neuter)`,exampleSentence:`Eso no es verdad.`,exampleTranslation:`That is not true.`,type:"pronoun",gender:null,rank:60},
+  {id:61,spanish:`esto`,english:`this (neuter)`,exampleSentence:`Esto me parece muy bien.`,exampleTranslation:`This seems very good to me.`,type:"pronoun",gender:null,rank:61},
+  {id:62,spanish:`ese`,english:`that (m)`,exampleSentence:`Ese hombre es mi padre.`,exampleTranslation:`That man is my father.`,type:"adjective",gender:null,rank:62},
+  {id:63,spanish:`esa`,english:`that (f)`,exampleSentence:`Esa idea es brillante.`,exampleTranslation:`That idea is brilliant.`,type:"adjective",gender:null,rank:63},
+  {id:64,spanish:`aquel`,english:`that (far, m)`,exampleSentence:`Aquel edificio es muy antiguo.`,exampleTranslation:`That building over there is very old.`,type:"adjective",gender:null,rank:64},
+  {id:65,spanish:`aquella`,english:`that (far, f)`,exampleSentence:`Aquella mujer es médica.`,exampleTranslation:`That woman over there is a doctor.`,type:"adjective",gender:null,rank:65},
+  {id:66,spanish:`quien`,english:`who`,exampleSentence:`¿Sabes quién ganó el partido?`,exampleTranslation:`Do you know who won the match?`,type:"pronoun",gender:null,rank:66},
+  {id:67,spanish:`cual`,english:`which`,exampleSentence:`¿Cuál prefieres, el rojo o el azul?`,exampleTranslation:`Which do you prefer, the red or the blue?`,type:"pronoun",gender:null,rank:67},
+  {id:68,spanish:`nada`,english:`nothing`,exampleSentence:`No hay nada en la nevera.`,exampleTranslation:`There is nothing in the fridge.`,type:"pronoun",gender:null,rank:68},
+  {id:69,spanish:`algo`,english:`something`,exampleSentence:`¿Quieres algo de beber?`,exampleTranslation:`Do you want something to drink?`,type:"pronoun",gender:null,rank:69},
+  {id:70,spanish:`nadie`,english:`nobody`,exampleSentence:`Nadie sabe la respuesta correcta.`,exampleTranslation:`Nobody knows the correct answer.`,type:"pronoun",gender:null,rank:70},
+  {id:71,spanish:`alguien`,english:`someone`,exampleSentence:`Alguien llamó a la puerta.`,exampleTranslation:`Someone knocked at the door.`,type:"pronoun",gender:null,rank:71},
+  {id:72,spanish:`cada`,english:`each/every`,exampleSentence:`Corro cada mañana antes del trabajo.`,exampleTranslation:`I run every morning before work.`,type:"adjective",gender:null,rank:72},
+  {id:73,spanish:`otro`,english:`other (m)`,exampleSentence:`Necesito otro vaso de agua.`,exampleTranslation:`I need another glass of water.`,type:"adjective",gender:null,rank:73},
+  {id:74,spanish:`otra`,english:`other (f)`,exampleSentence:`Dame otra oportunidad, por favor.`,exampleTranslation:`Give me another chance, please.`,type:"adjective",gender:null,rank:74},
+  {id:75,spanish:`otros`,english:`others (m)`,exampleSentence:`Hay otros estudiantes esperando.`,exampleTranslation:`There are other students waiting.`,type:"adjective",gender:null,rank:75},
+  {id:76,spanish:`otras`,english:`others (f)`,exampleSentence:`Tengo otras cosas que hacer.`,exampleTranslation:`I have other things to do.`,type:"adjective",gender:null,rank:76},
+  {id:77,spanish:`tanto`,english:`so much`,exampleSentence:`No puedo comer tanto.`,exampleTranslation:`I can't eat that much.`,type:"adjective",gender:null,rank:77},
+  {id:78,spanish:`poco`,english:`little/few`,exampleSentence:`Tengo un poco de hambre.`,exampleTranslation:`I am a little hungry.`,type:"adjective",gender:null,rank:78},
+  {id:79,spanish:`mucho`,english:`much/many`,exampleSentence:`Tengo mucho trabajo esta semana.`,exampleTranslation:`I have a lot of work this week.`,type:"adjective",gender:null,rank:79},
+  {id:80,spanish:`varios`,english:`several`,exampleSentence:`Hay varios libros sobre la mesa.`,exampleTranslation:`There are several books on the table.`,type:"adjective",gender:null,rank:80},
+  {id:81,spanish:`unos`,english:`some (m pl)`,exampleSentence:`Unos niños juegan en el parque.`,exampleTranslation:`Some children play in the park.`,type:"article",gender:null,rank:81},
+  {id:82,spanish:`aquello`,english:`that (far, neuter)`,exampleSentence:`Aquello que dijiste me hizo pensar.`,exampleTranslation:`What you said made me think.`,type:"pronoun",gender:null,rank:82},
+  {id:83,spanish:`cuyo`,english:`whose`,exampleSentence:`El autor cuyo libro leí vive aquí.`,exampleTranslation:`The author whose book I read lives here.`,type:"adjective",gender:null,rank:83},
+  {id:84,spanish:`tanta`,english:`so much (f)`,exampleSentence:`No tenía tanta energía antes.`,exampleTranslation:`I didn't have that much energy before.`,type:"adjective",gender:null,rank:84},
+  {id:85,spanish:`ser`,english:`to be (permanent)`,exampleSentence:`Quiero ser un buen médico.`,exampleTranslation:`I want to be a good doctor.`,type:"verb",gender:null,rank:85},
+  {id:86,spanish:`estar`,english:`to be (temporary)`,exampleSentence:`¿Dónde estás ahora mismo?`,exampleTranslation:`Where are you right now?`,type:"verb",gender:null,rank:86},
+  {id:87,spanish:`tener`,english:`to have`,exampleSentence:`Tengo una familia muy grande.`,exampleTranslation:`I have a very big family.`,type:"verb",gender:null,rank:87},
+  {id:88,spanish:`hacer`,english:`to do/make`,exampleSentence:`¿Qué vas a hacer este fin de semana?`,exampleTranslation:`What are you going to do this weekend?`,type:"verb",gender:null,rank:88},
+  {id:89,spanish:`ir`,english:`to go`,exampleSentence:`Voy a ir al gimnasio mañana.`,exampleTranslation:`I am going to go to the gym tomorrow.`,type:"verb",gender:null,rank:89},
+  {id:90,spanish:`poder`,english:`can/to be able`,exampleSentence:`No puedo dormir cuando hay ruido.`,exampleTranslation:`I can't sleep when there is noise.`,type:"verb",gender:null,rank:90},
+  {id:91,spanish:`decir`,english:`to say/tell`,exampleSentence:`¿Qué quieres decir con eso?`,exampleTranslation:`What do you mean by that?`,type:"verb",gender:null,rank:91},
+  {id:92,spanish:`ver`,english:`to see`,exampleSentence:`Puedo ver las montañas desde aquí.`,exampleTranslation:`I can see the mountains from here.`,type:"verb",gender:null,rank:92},
+  {id:93,spanish:`dar`,english:`to give`,exampleSentence:`Quiero dar las gracias a todos.`,exampleTranslation:`I want to give thanks to everyone.`,type:"verb",gender:null,rank:93},
+  {id:94,spanish:`saber`,english:`to know (fact)`,exampleSentence:`No sé dónde están mis llaves.`,exampleTranslation:`I don't know where my keys are.`,type:"verb",gender:null,rank:94},
+  {id:95,spanish:`querer`,english:`to want/love`,exampleSentence:`Te quiero mucho, mamá.`,exampleTranslation:`I love you very much, mom.`,type:"verb",gender:null,rank:95},
+  {id:96,spanish:`llegar`,english:`to arrive`,exampleSentence:`El avión va a llegar tarde.`,exampleTranslation:`The plane is going to arrive late.`,type:"verb",gender:null,rank:96},
+  {id:97,spanish:`pasar`,english:`to pass/happen`,exampleSentence:`¿Qué pasó en la reunión?`,exampleTranslation:`What happened at the meeting?`,type:"verb",gender:null,rank:97},
+  {id:98,spanish:`deber`,english:`must/to owe`,exampleSentence:`Debes estudiar más para el examen.`,exampleTranslation:`You should study more for the exam.`,type:"verb",gender:null,rank:98},
+  {id:99,spanish:`poner`,english:`to put/place`,exampleSentence:`Voy a poner la mesa para cenar.`,exampleTranslation:`I'm going to set the table for dinner.`,type:"verb",gender:null,rank:99},
+  {id:100,spanish:`parecer`,english:`to seem/appear`,exampleSentence:`Parece que va a llover hoy.`,exampleTranslation:`It seems like it's going to rain today.`,type:"verb",gender:null,rank:100},
+  {id:101,spanish:`quedar`,english:`to stay/remain`,exampleSentence:`Quedé en el café con mis amigos.`,exampleTranslation:`I met my friends at the café.`,type:"verb",gender:null,rank:101},
+  {id:102,spanish:`creer`,english:`to believe/think`,exampleSentence:`Creo que tienes mucha razón.`,exampleTranslation:`I think you are very right.`,type:"verb",gender:null,rank:102},
+  {id:103,spanish:`hablar`,english:`to speak/talk`,exampleSentence:`Me gusta hablar con personas interesantes.`,exampleTranslation:`I like to talk with interesting people.`,type:"verb",gender:null,rank:103},
+  {id:104,spanish:`llevar`,english:`to carry/wear`,exampleSentence:`¿Qué vas a llevar a la fiesta?`,exampleTranslation:`What are you going to wear to the party?`,type:"verb",gender:null,rank:104},
+  {id:105,spanish:`dejar`,english:`to leave/let`,exampleSentence:`No dejes para mañana lo que puedas hacer hoy.`,exampleTranslation:`Don't leave for tomorrow what you can do today.`,type:"verb",gender:null,rank:105},
+  {id:106,spanish:`seguir`,english:`to follow/continue`,exampleSentence:`Sigue recto y gira a la derecha.`,exampleTranslation:`Continue straight and turn right.`,type:"verb",gender:null,rank:106},
+  {id:107,spanish:`encontrar`,english:`to find`,exampleSentence:`No puedo encontrar mis gafas.`,exampleTranslation:`I can't find my glasses.`,type:"verb",gender:null,rank:107},
+  {id:108,spanish:`llamar`,english:`to call/name`,exampleSentence:`Voy a llamar a mis padres esta noche.`,exampleTranslation:`I'm going to call my parents tonight.`,type:"verb",gender:null,rank:108},
+  {id:109,spanish:`venir`,english:`to come`,exampleSentence:`¿Puedes venir a mi casa mañana?`,exampleTranslation:`Can you come to my house tomorrow?`,type:"verb",gender:null,rank:109},
+  {id:110,spanish:`pensar`,english:`to think`,exampleSentence:`Necesito tiempo para pensar.`,exampleTranslation:`I need time to think.`,type:"verb",gender:null,rank:110},
+  {id:111,spanish:`salir`,english:`to leave/go out`,exampleSentence:`¿A qué hora vas a salir del trabajo?`,exampleTranslation:`What time are you going to leave work?`,type:"verb",gender:null,rank:111},
+  {id:112,spanish:`volver`,english:`to return`,exampleSentence:`¿Cuándo vas a volver de tu viaje?`,exampleTranslation:`When are you going to return from your trip?`,type:"verb",gender:null,rank:112},
+  {id:113,spanish:`tomar`,english:`to take/have`,exampleSentence:`Tomo un café cada mañana.`,exampleTranslation:`I have a coffee every morning.`,type:"verb",gender:null,rank:113},
+  {id:114,spanish:`conocer`,english:`to know (person)`,exampleSentence:`Quiero conocer gente nueva.`,exampleTranslation:`I want to meet new people.`,type:"verb",gender:null,rank:114},
+  {id:115,spanish:`vivir`,english:`to live`,exampleSentence:`Vivimos en un apartamento pequeño.`,exampleTranslation:`We live in a small apartment.`,type:"verb",gender:null,rank:115},
+  {id:116,spanish:`sentir`,english:`to feel/sense`,exampleSentence:`Siento mucho lo que ocurrió.`,exampleTranslation:`I'm very sorry about what happened.`,type:"verb",gender:null,rank:116},
+  {id:117,spanish:`tratar`,english:`to treat/try`,exampleSentence:`Voy a tratar de mejorar mi español.`,exampleTranslation:`I'm going to try to improve my Spanish.`,type:"verb",gender:null,rank:117},
+  {id:118,spanish:`mirar`,english:`to look/watch`,exampleSentence:`Me gusta mirar las estrellas de noche.`,exampleTranslation:`I like to look at the stars at night.`,type:"verb",gender:null,rank:118},
+  {id:119,spanish:`contar`,english:`to count/tell`,exampleSentence:`¿Me puedes contar lo que pasó?`,exampleTranslation:`Can you tell me what happened?`,type:"verb",gender:null,rank:119},
+  {id:120,spanish:`empezar`,english:`to begin/start`,exampleSentence:`Vamos a empezar la reunión ahora.`,exampleTranslation:`Let's start the meeting now.`,type:"verb",gender:null,rank:120},
+  {id:121,spanish:`esperar`,english:`to wait/hope`,exampleSentence:`Tengo que esperar el autobús.`,exampleTranslation:`I have to wait for the bus.`,type:"verb",gender:null,rank:121},
+  {id:122,spanish:`buscar`,english:`to look for`,exampleSentence:`Estoy buscando un apartamento nuevo.`,exampleTranslation:`I am looking for a new apartment.`,type:"verb",gender:null,rank:122},
+  {id:123,spanish:`entrar`,english:`to enter`,exampleSentence:`No puedes entrar sin permiso.`,exampleTranslation:`You can't enter without permission.`,type:"verb",gender:null,rank:123},
+  {id:124,spanish:`trabajar`,english:`to work`,exampleSentence:`Trabajo en una empresa de tecnología.`,exampleTranslation:`I work at a technology company.`,type:"verb",gender:null,rank:124},
+  {id:125,spanish:`escribir`,english:`to write`,exampleSentence:`Me gusta escribir en mi diario.`,exampleTranslation:`I like to write in my diary.`,type:"verb",gender:null,rank:125},
+  {id:126,spanish:`perder`,english:`to lose/miss`,exampleSentence:`No quiero perder esta oportunidad.`,exampleTranslation:`I don't want to miss this opportunity.`,type:"verb",gender:null,rank:126},
+  {id:127,spanish:`producir`,english:`to produce`,exampleSentence:`Esta fábrica produce muchos coches.`,exampleTranslation:`This factory produces many cars.`,type:"verb",gender:null,rank:127},
+  {id:128,spanish:`entender`,english:`to understand`,exampleSentence:`No entiendo esta lección.`,exampleTranslation:`I don't understand this lesson.`,type:"verb",gender:null,rank:128},
+  {id:129,spanish:`pedir`,english:`to ask for/order`,exampleSentence:`Voy a pedir una pizza para cenar.`,exampleTranslation:`I'm going to order a pizza for dinner.`,type:"verb",gender:null,rank:129},
+  {id:130,spanish:`recibir`,english:`to receive`,exampleSentence:`Recibí una carta de mi amiga.`,exampleTranslation:`I received a letter from my friend.`,type:"verb",gender:null,rank:130},
+  {id:131,spanish:`recordar`,english:`to remember`,exampleSentence:`No puedo recordar su nombre.`,exampleTranslation:`I can't remember his name.`,type:"verb",gender:null,rank:131},
+  {id:132,spanish:`terminar`,english:`to finish/end`,exampleSentence:`Necesito terminar este proyecto hoy.`,exampleTranslation:`I need to finish this project today.`,type:"verb",gender:null,rank:132},
+  {id:133,spanish:`abrir`,english:`to open`,exampleSentence:`¿Puedes abrir la ventana, por favor?`,exampleTranslation:`Can you open the window, please?`,type:"verb",gender:null,rank:133},
+  {id:134,spanish:`necesitar`,english:`to need`,exampleSentence:`Necesito un nuevo ordenador.`,exampleTranslation:`I need a new computer.`,type:"verb",gender:null,rank:134},
+  {id:135,spanish:`leer`,english:`to read`,exampleSentence:`Me encanta leer novelas históricas.`,exampleTranslation:`I love to read historical novels.`,type:"verb",gender:null,rank:135},
+  {id:136,spanish:`usar`,english:`to use`,exampleSentence:`¿Sabes usar este programa?`,exampleTranslation:`Do you know how to use this program?`,type:"verb",gender:null,rank:136},
+  {id:137,spanish:`caer`,english:`to fall`,exampleSentence:`El niño cayó de la bicicleta.`,exampleTranslation:`The child fell off the bicycle.`,type:"verb",gender:null,rank:137},
+  {id:138,spanish:`suponer`,english:`to suppose/assume`,exampleSentence:`Supongo que tienes razón.`,exampleTranslation:`I suppose you are right.`,type:"verb",gender:null,rank:138},
+  {id:139,spanish:`explicar`,english:`to explain`,exampleSentence:`¿Puedes explicar cómo funciona?`,exampleTranslation:`Can you explain how it works?`,type:"verb",gender:null,rank:139},
+  {id:140,spanish:`preguntar`,english:`to ask (question)`,exampleSentence:`Quiero preguntar algo importante.`,exampleTranslation:`I want to ask something important.`,type:"verb",gender:null,rank:140},
+  {id:141,spanish:`tocar`,english:`to touch/play`,exampleSentence:`Me gusta tocar la guitarra.`,exampleTranslation:`I like to play the guitar.`,type:"verb",gender:null,rank:141},
+  {id:142,spanish:`cambiar`,english:`to change`,exampleSentence:`Necesito cambiar mis hábitos.`,exampleTranslation:`I need to change my habits.`,type:"verb",gender:null,rank:142},
+  {id:143,spanish:`mostrar`,english:`to show`,exampleSentence:`Voy a mostrar mis fotos de viaje.`,exampleTranslation:`I'm going to show my travel photos.`,type:"verb",gender:null,rank:143},
+  {id:144,spanish:`morir`,english:`to die`,exampleSentence:`El árbol murió por falta de agua.`,exampleTranslation:`The tree died from lack of water.`,type:"verb",gender:null,rank:144},
+  {id:145,spanish:`crear`,english:`to create`,exampleSentence:`Quiero crear algo nuevo y diferente.`,exampleTranslation:`I want to create something new and different.`,type:"verb",gender:null,rank:145},
+  {id:146,spanish:`obtener`,english:`to obtain/get`,exampleSentence:`Espero obtener buenos resultados.`,exampleTranslation:`I hope to obtain good results.`,type:"verb",gender:null,rank:146},
+  {id:147,spanish:`lograr`,english:`to achieve/manage`,exampleSentence:`Logré terminar el maratón.`,exampleTranslation:`I managed to finish the marathon.`,type:"verb",gender:null,rank:147},
+  {id:148,spanish:`mantener`,english:`to maintain/keep`,exampleSentence:`Es importante mantener la calma.`,exampleTranslation:`It's important to maintain calm.`,type:"verb",gender:null,rank:148},
+  {id:149,spanish:`comenzar`,english:`to begin/start`,exampleSentence:`La película va a comenzar pronto.`,exampleTranslation:`The movie is going to start soon.`,type:"verb",gender:null,rank:149},
+  {id:150,spanish:`sacar`,english:`to take out/get`,exampleSentence:`¿Puedes sacar al perro?`,exampleTranslation:`Can you take the dog out?`,type:"verb",gender:null,rank:150},
+  {id:151,spanish:`subir`,english:`to go up/upload`,exampleSentence:`Subimos las escaleras hasta el tercer piso.`,exampleTranslation:`We went up the stairs to the third floor.`,type:"verb",gender:null,rank:151},
+  {id:152,spanish:`bajar`,english:`to go down/lower`,exampleSentence:`Tengo que bajar de peso.`,exampleTranslation:`I need to lose weight.`,type:"verb",gender:null,rank:152},
+  {id:153,spanish:`ayudar`,english:`to help`,exampleSentence:`¿Puedes ayudarme con esto?`,exampleTranslation:`Can you help me with this?`,type:"verb",gender:null,rank:153},
+  {id:154,spanish:`ganar`,english:`to win/earn`,exampleSentence:`Nuestro equipo ganó el partido.`,exampleTranslation:`Our team won the match.`,type:"verb",gender:null,rank:154},
+  {id:155,spanish:`estudiar`,english:`to study`,exampleSentence:`Hay que estudiar todos los días.`,exampleTranslation:`You have to study every day.`,type:"verb",gender:null,rank:155},
+  {id:156,spanish:`jugar`,english:`to play (game)`,exampleSentence:`A los niños les encanta jugar.`,exampleTranslation:`Children love to play.`,type:"verb",gender:null,rank:156},
+  {id:157,spanish:`correr`,english:`to run`,exampleSentence:`Corro cinco kilómetros cada mañana.`,exampleTranslation:`I run five kilometers every morning.`,type:"verb",gender:null,rank:157},
+  {id:158,spanish:`comprar`,english:`to buy`,exampleSentence:`Voy a comprar comida para la semana.`,exampleTranslation:`I'm going to buy food for the week.`,type:"verb",gender:null,rank:158},
+  {id:159,spanish:`vender`,english:`to sell`,exampleSentence:`Quiero vender mi coche viejo.`,exampleTranslation:`I want to sell my old car.`,type:"verb",gender:null,rank:159},
+  {id:160,spanish:`comer`,english:`to eat`,exampleSentence:`Me gusta comer en restaurantes nuevos.`,exampleTranslation:`I like to eat at new restaurants.`,type:"verb",gender:null,rank:160},
+  {id:161,spanish:`beber`,english:`to drink`,exampleSentence:`Deberías beber más agua.`,exampleTranslation:`You should drink more water.`,type:"verb",gender:null,rank:161},
+  {id:162,spanish:`dormir`,english:`to sleep`,exampleSentence:`Necesito dormir al menos ocho horas.`,exampleTranslation:`I need to sleep at least eight hours.`,type:"verb",gender:null,rank:162},
+  {id:163,spanish:`caminar`,english:`to walk`,exampleSentence:`Caminar es bueno para la salud.`,exampleTranslation:`Walking is good for health.`,type:"verb",gender:null,rank:163},
+  {id:164,spanish:`decidir`,english:`to decide`,exampleSentence:`Tengo que decidir qué estudiar.`,exampleTranslation:`I have to decide what to study.`,type:"verb",gender:null,rank:164},
+  {id:165,spanish:`elegir`,english:`to choose/select`,exampleSentence:`Es difícil elegir entre tantas opciones.`,exampleTranslation:`It's hard to choose between so many options.`,type:"verb",gender:null,rank:165},
+  {id:166,spanish:`tiempo`,english:`time/weather`,exampleSentence:`No tengo tiempo para descansar.`,exampleTranslation:`I don't have time to rest.`,type:"noun",gender:"masculine",rank:166},
+  {id:167,spanish:`año`,english:`year`,exampleSentence:`Este año cumplo treinta años.`,exampleTranslation:`This year I'm turning thirty.`,type:"noun",gender:"masculine",rank:167},
+  {id:168,spanish:`vida`,english:`life`,exampleSentence:`La vida es un regalo maravilloso.`,exampleTranslation:`Life is a wonderful gift.`,type:"noun",gender:"feminine",rank:168},
+  {id:169,spanish:`día`,english:`day`,exampleSentence:`Es un día perfecto para salir.`,exampleTranslation:`It's a perfect day to go out.`,type:"noun",gender:"masculine",rank:169},
+  {id:170,spanish:`hombre`,english:`man`,exampleSentence:`Ese hombre es muy simpático.`,exampleTranslation:`That man is very friendly.`,type:"noun",gender:"masculine",rank:170},
+  {id:171,spanish:`mujer`,english:`woman`,exampleSentence:`La mujer trabaja como ingeniera.`,exampleTranslation:`The woman works as an engineer.`,type:"noun",gender:"feminine",rank:171},
+  {id:172,spanish:`cosa`,english:`thing`,exampleSentence:`Eso es la cosa más importante.`,exampleTranslation:`That is the most important thing.`,type:"noun",gender:"feminine",rank:172},
+  {id:173,spanish:`vez`,english:`time/occasion`,exampleSentence:`La primera vez que visité París fue increíble.`,exampleTranslation:`The first time I visited Paris was incredible.`,type:"noun",gender:"feminine",rank:173},
+  {id:174,spanish:`parte`,english:`part`,exampleSentence:`Una parte del pastel es para ti.`,exampleTranslation:`A part of the cake is for you.`,type:"noun",gender:"feminine",rank:174},
+  {id:175,spanish:`lugar`,english:`place`,exampleSentence:`Este es mi lugar favorito en el mundo.`,exampleTranslation:`This is my favorite place in the world.`,type:"noun",gender:"masculine",rank:175},
+  {id:176,spanish:`mundo`,english:`world`,exampleSentence:`El mundo es muy grande y diverso.`,exampleTranslation:`The world is very big and diverse.`,type:"noun",gender:"masculine",rank:176},
+  {id:177,spanish:`país`,english:`country`,exampleSentence:`España es un país hermoso.`,exampleTranslation:`Spain is a beautiful country.`,type:"noun",gender:"masculine",rank:177},
+  {id:178,spanish:`ciudad`,english:`city`,exampleSentence:`Me encanta vivir en esta ciudad.`,exampleTranslation:`I love living in this city.`,type:"noun",gender:"feminine",rank:178},
+  {id:179,spanish:`casa`,english:`house/home`,exampleSentence:`Mi casa tiene tres habitaciones.`,exampleTranslation:`My house has three bedrooms.`,type:"noun",gender:"feminine",rank:179},
+  {id:180,spanish:`trabajo`,english:`work/job`,exampleSentence:`Busco un trabajo interesante.`,exampleTranslation:`I'm looking for an interesting job.`,type:"noun",gender:"masculine",rank:180},
+  {id:181,spanish:`gobierno`,english:`government`,exampleSentence:`El gobierno anunció nuevas medidas.`,exampleTranslation:`The government announced new measures.`,type:"noun",gender:"masculine",rank:181},
+  {id:182,spanish:`nombre`,english:`name`,exampleSentence:`¿Cuál es tu nombre completo?`,exampleTranslation:`What is your full name?`,type:"noun",gender:"masculine",rank:182},
+  {id:183,spanish:`forma`,english:`form/way`,exampleSentence:`No hay una única forma de hacerlo.`,exampleTranslation:`There is no single way to do it.`,type:"noun",gender:"feminine",rank:183},
+  {id:184,spanish:`agua`,english:`water`,exampleSentence:`El agua del río está muy fría.`,exampleTranslation:`The river water is very cold.`,type:"noun",gender:"feminine",rank:184},
+  {id:185,spanish:`noche`,english:`night`,exampleSentence:`Esta noche vamos a cenar juntos.`,exampleTranslation:`Tonight we're going to have dinner together.`,type:"noun",gender:"feminine",rank:185},
+  {id:186,spanish:`punto`,english:`point`,exampleSentence:`Ese es el punto más importante.`,exampleTranslation:`That is the most important point.`,type:"noun",gender:"masculine",rank:186},
+  {id:187,spanish:`número`,english:`number`,exampleSentence:`¿Cuál es tu número de teléfono?`,exampleTranslation:`What is your phone number?`,type:"noun",gender:"masculine",rank:187},
+  {id:188,spanish:`sistema`,english:`system`,exampleSentence:`El sistema educativo necesita cambios.`,exampleTranslation:`The educational system needs changes.`,type:"noun",gender:"masculine",rank:188},
+  {id:189,spanish:`mano`,english:`hand`,exampleSentence:`Me dio la mano al saludarme.`,exampleTranslation:`She gave me her hand when greeting me.`,type:"noun",gender:"feminine",rank:189},
+  {id:190,spanish:`persona`,english:`person`,exampleSentence:`Es una persona muy generosa.`,exampleTranslation:`He/She is a very generous person.`,type:"noun",gender:"feminine",rank:190},
+  {id:191,spanish:`familia`,english:`family`,exampleSentence:`La familia es lo más importante.`,exampleTranslation:`Family is the most important thing.`,type:"noun",gender:"feminine",rank:191},
+  {id:192,spanish:`problema`,english:`problem`,exampleSentence:`Tenemos un problema serio.`,exampleTranslation:`We have a serious problem.`,type:"noun",gender:"masculine",rank:192},
+  {id:193,spanish:`momento`,english:`moment`,exampleSentence:`Fue el mejor momento de mi vida.`,exampleTranslation:`It was the best moment of my life.`,type:"noun",gender:"masculine",rank:193},
+  {id:194,spanish:`gente`,english:`people`,exampleSentence:`Hay mucha gente en la plaza.`,exampleTranslation:`There are many people in the square.`,type:"noun",gender:"feminine",rank:194},
+  {id:195,spanish:`historia`,english:`history/story`,exampleSentence:`Me encanta leer sobre la historia.`,exampleTranslation:`I love reading about history.`,type:"noun",gender:"feminine",rank:195},
+  {id:196,spanish:`sociedad`,english:`society`,exampleSentence:`Vivimos en una sociedad plural.`,exampleTranslation:`We live in a plural society.`,type:"noun",gender:"feminine",rank:196},
+  {id:197,spanish:`ojo`,english:`eye`,exampleSentence:`Tiene los ojos de color azul.`,exampleTranslation:`She has blue eyes.`,type:"noun",gender:"masculine",rank:197},
+  {id:198,spanish:`nivel`,english:`level`,exampleSentence:`Mi nivel de español es intermedio.`,exampleTranslation:`My Spanish level is intermediate.`,type:"noun",gender:"masculine",rank:198},
+  {id:199,spanish:`razón`,english:`reason`,exampleSentence:`Tienes razón en lo que dices.`,exampleTranslation:`You are right in what you say.`,type:"noun",gender:"feminine",rank:199},
+  {id:200,spanish:`caso`,english:`case`,exampleSentence:`En este caso, no hay solución fácil.`,exampleTranslation:`In this case, there is no easy solution.`,type:"noun",gender:"masculine",rank:200},
+  {id:201,spanish:`estado`,english:`state/condition`,exampleSentence:`El estado de la economía es complicado.`,exampleTranslation:`The state of the economy is complicated.`,type:"noun",gender:"masculine",rank:201},
+  {id:202,spanish:`tipo`,english:`type/kind`,exampleSentence:`¿Qué tipo de música te gusta?`,exampleTranslation:`What type of music do you like?`,type:"noun",gender:"masculine",rank:202},
+  {id:203,spanish:`modo`,english:`way/mode`,exampleSentence:`Hay un modo de hacerlo mejor.`,exampleTranslation:`There is a way to do it better.`,type:"noun",gender:"masculine",rank:203},
+  {id:204,spanish:`grupo`,english:`group`,exampleSentence:`Somos un grupo de buenos amigos.`,exampleTranslation:`We are a group of good friends.`,type:"noun",gender:"masculine",rank:204},
+  {id:205,spanish:`pregunta`,english:`question`,exampleSentence:`Tengo una pregunta para ti.`,exampleTranslation:`I have a question for you.`,type:"noun",gender:"feminine",rank:205},
+  {id:206,spanish:`ejemplo`,english:`example`,exampleSentence:`Dame un ejemplo de lo que quieres decir.`,exampleTranslation:`Give me an example of what you want to say.`,type:"noun",gender:"masculine",rank:206},
+  {id:207,spanish:`derecho`,english:`right/law`,exampleSentence:`Todos tenemos derecho a la educación.`,exampleTranslation:`We all have the right to education.`,type:"noun",gender:"masculine",rank:207},
+  {id:208,spanish:`proceso`,english:`process`,exampleSentence:`El proceso de aprendizaje lleva tiempo.`,exampleTranslation:`The learning process takes time.`,type:"noun",gender:"masculine",rank:208},
+  {id:209,spanish:`mes`,english:`month`,exampleSentence:`El mes que viene me voy de vacaciones.`,exampleTranslation:`Next month I'm going on vacation.`,type:"noun",gender:"masculine",rank:209},
+  {id:210,spanish:`semana`,english:`week`,exampleSentence:`La semana pasada estuve muy ocupado.`,exampleTranslation:`Last week I was very busy.`,type:"noun",gender:"feminine",rank:210},
+  {id:211,spanish:`cuerpo`,english:`body`,exampleSentence:`Es importante cuidar el cuerpo.`,exampleTranslation:`It's important to take care of the body.`,type:"noun",gender:"masculine",rank:211},
+  {id:212,spanish:`luz`,english:`light`,exampleSentence:`La luz del sol entra por la ventana.`,exampleTranslation:`The sunlight enters through the window.`,type:"noun",gender:"feminine",rank:212},
+  {id:213,spanish:`calle`,english:`street`,exampleSentence:`Vivo en una calle tranquila.`,exampleTranslation:`I live on a quiet street.`,type:"noun",gender:"feminine",rank:213},
+  {id:214,spanish:`libro`,english:`book`,exampleSentence:`Estoy leyendo un libro muy bueno.`,exampleTranslation:`I'm reading a very good book.`,type:"noun",gender:"masculine",rank:214},
+  {id:215,spanish:`dinero`,english:`money`,exampleSentence:`No tengo suficiente dinero.`,exampleTranslation:`I don't have enough money.`,type:"noun",gender:"masculine",rank:215},
+  {id:216,spanish:`niño`,english:`child/boy`,exampleSentence:`El niño llora porque tiene hambre.`,exampleTranslation:`The child cries because he is hungry.`,type:"noun",gender:"masculine",rank:216},
+  {id:217,spanish:`padre`,english:`father`,exampleSentence:`Mi padre trabaja mucho.`,exampleTranslation:`My father works a lot.`,type:"noun",gender:"masculine",rank:217},
+  {id:218,spanish:`madre`,english:`mother`,exampleSentence:`Mi madre cocina muy bien.`,exampleTranslation:`My mother cooks very well.`,type:"noun",gender:"feminine",rank:218},
+  {id:219,spanish:`hijo`,english:`son/child`,exampleSentence:`Mi hijo tiene cinco años.`,exampleTranslation:`My son is five years old.`,type:"noun",gender:"masculine",rank:219},
+  {id:220,spanish:`amigo`,english:`friend`,exampleSentence:`Mi mejor amigo vive en Madrid.`,exampleTranslation:`My best friend lives in Madrid.`,type:"noun",gender:"masculine",rank:220},
+  {id:221,spanish:`escuela`,english:`school`,exampleSentence:`Los niños van a la escuela en autobús.`,exampleTranslation:`The children go to school by bus.`,type:"noun",gender:"feminine",rank:221},
+  {id:222,spanish:`universidad`,english:`university`,exampleSentence:`Estudié en la universidad de Barcelona.`,exampleTranslation:`I studied at the University of Barcelona.`,type:"noun",gender:"feminine",rank:222},
+  {id:223,spanish:`hospital`,english:`hospital`,exampleSentence:`El hospital más cercano está a dos kilómetros.`,exampleTranslation:`The nearest hospital is two kilometers away.`,type:"noun",gender:"masculine",rank:223},
+  {id:224,spanish:`parque`,english:`park`,exampleSentence:`Paseo al perro en el parque cada día.`,exampleTranslation:`I walk the dog in the park every day.`,type:"noun",gender:"masculine",rank:224},
+  {id:225,spanish:`playa`,english:`beach`,exampleSentence:`Me encanta pasar el verano en la playa.`,exampleTranslation:`I love spending the summer at the beach.`,type:"noun",gender:"feminine",rank:225},
+  {id:226,spanish:`montaña`,english:`mountain`,exampleSentence:`Desde la montaña se ve todo el valle.`,exampleTranslation:`From the mountain you can see the whole valley.`,type:"noun",gender:"feminine",rank:226},
+  {id:227,spanish:`río`,english:`river`,exampleSentence:`El río pasa por el centro de la ciudad.`,exampleTranslation:`The river runs through the center of the city.`,type:"noun",gender:"masculine",rank:227},
+  {id:228,spanish:`mar`,english:`sea`,exampleSentence:`El mar está en calma hoy.`,exampleTranslation:`The sea is calm today.`,type:"noun",gender:"masculine",rank:228},
+  {id:229,spanish:`sol`,english:`sun`,exampleSentence:`El sol sale muy temprano en verano.`,exampleTranslation:`The sun rises very early in summer.`,type:"noun",gender:"masculine",rank:229},
+  {id:230,spanish:`luna`,english:`moon`,exampleSentence:`Esta noche la luna está llena.`,exampleTranslation:`Tonight the moon is full.`,type:"noun",gender:"feminine",rank:230},
+  {id:231,spanish:`cielo`,english:`sky`,exampleSentence:`El cielo está despejado y azul.`,exampleTranslation:`The sky is clear and blue.`,type:"noun",gender:"masculine",rank:231},
+  {id:232,spanish:`tierra`,english:`earth/land`,exampleSentence:`La tierra que cultivan es muy fértil.`,exampleTranslation:`The land they cultivate is very fertile.`,type:"noun",gender:"feminine",rank:232},
+  {id:233,spanish:`música`,english:`music`,exampleSentence:`La música me ayuda a relajarme.`,exampleTranslation:`Music helps me to relax.`,type:"noun",gender:"feminine",rank:233},
+  {id:234,spanish:`arte`,english:`art`,exampleSentence:`El arte puede cambiar el mundo.`,exampleTranslation:`Art can change the world.`,type:"noun",gender:"masculine",rank:234},
+  {id:235,spanish:`deporte`,english:`sport`,exampleSentence:`El deporte es esencial para la salud.`,exampleTranslation:`Sport is essential for health.`,type:"noun",gender:"masculine",rank:235},
+  {id:236,spanish:`fútbol`,english:`soccer/football`,exampleSentence:`El fútbol es el deporte más popular del mundo.`,exampleTranslation:`Soccer is the most popular sport in the world.`,type:"noun",gender:"masculine",rank:236},
+  {id:237,spanish:`noticia`,english:`news item`,exampleSentence:`Escuché una noticia importante esta mañana.`,exampleTranslation:`I heard an important piece of news this morning.`,type:"noun",gender:"feminine",rank:237},
+  {id:238,spanish:`televisión`,english:`television`,exampleSentence:`No veo mucho la televisión.`,exampleTranslation:`I don't watch television much.`,type:"noun",gender:"feminine",rank:238},
+  {id:239,spanish:`teléfono`,english:`phone`,exampleSentence:`Olvidé mi teléfono en casa.`,exampleTranslation:`I forgot my phone at home.`,type:"noun",gender:"masculine",rank:239},
+  {id:240,spanish:`coche`,english:`car`,exampleSentence:`Mi coche no arranca esta mañana.`,exampleTranslation:`My car won't start this morning.`,type:"noun",gender:"masculine",rank:240},
+  {id:241,spanish:`avión`,english:`airplane`,exampleSentence:`El avión despegó a tiempo.`,exampleTranslation:`The plane took off on time.`,type:"noun",gender:"masculine",rank:241},
+  {id:242,spanish:`tren`,english:`train`,exampleSentence:`Prefiero viajar en tren.`,exampleTranslation:`I prefer to travel by train.`,type:"noun",gender:"masculine",rank:242},
+  {id:243,spanish:`cama`,english:`bed`,exampleSentence:`Me metí en la cama temprano.`,exampleTranslation:`I went to bed early.`,type:"noun",gender:"feminine",rank:243},
+  {id:244,spanish:`mesa`,english:`table`,exampleSentence:`Pusimos los platos sobre la mesa.`,exampleTranslation:`We put the plates on the table.`,type:"noun",gender:"feminine",rank:244},
+  {id:245,spanish:`puerta`,english:`door`,exampleSentence:`Alguien llamó a la puerta.`,exampleTranslation:`Someone knocked on the door.`,type:"noun",gender:"feminine",rank:245},
+  {id:246,spanish:`cocina`,english:`kitchen`,exampleSentence:`La cocina está bien equipada.`,exampleTranslation:`The kitchen is well equipped.`,type:"noun",gender:"feminine",rank:246},
+  {id:247,spanish:`habitación`,english:`room`,exampleSentence:`Mi habitación es pequeña pero acogedora.`,exampleTranslation:`My room is small but cozy.`,type:"noun",gender:"feminine",rank:247},
+  {id:248,spanish:`corazón`,english:`heart`,exampleSentence:`Mi corazón late muy rápido.`,exampleTranslation:`My heart beats very fast.`,type:"noun",gender:"masculine",rank:248},
+  {id:249,spanish:`cabeza`,english:`head`,exampleSentence:`Me duele la cabeza.`,exampleTranslation:`I have a headache.`,type:"noun",gender:"feminine",rank:249},
+  {id:250,spanish:`cara`,english:`face`,exampleSentence:`Tiene una cara muy expresiva.`,exampleTranslation:`She has a very expressive face.`,type:"noun",gender:"feminine",rank:250},
+  {id:251,spanish:`boca`,english:`mouth`,exampleSentence:`Abre la boca, por favor.`,exampleTranslation:`Open your mouth, please.`,type:"noun",gender:"feminine",rank:251},
+  {id:252,spanish:`grande`,english:`big/great`,exampleSentence:`Barcelona es una ciudad muy grande.`,exampleTranslation:`Barcelona is a very big city.`,type:"adjective",gender:null,rank:252},
+  {id:253,spanish:`nuevo`,english:`new`,exampleSentence:`Tengo un nuevo apartamento en el centro.`,exampleTranslation:`I have a new apartment in the center.`,type:"adjective",gender:null,rank:253},
+  {id:254,spanish:`bueno`,english:`good`,exampleSentence:`Tienes un corazón muy bueno.`,exampleTranslation:`You have a very good heart.`,type:"adjective",gender:null,rank:254},
+  {id:255,spanish:`mismo`,english:`same/very`,exampleSentence:`Vivimos en el mismo barrio.`,exampleTranslation:`We live in the same neighborhood.`,type:"adjective",gender:null,rank:255},
+  {id:256,spanish:`último`,english:`last/latest`,exampleSentence:`Es el último día del mes.`,exampleTranslation:`It's the last day of the month.`,type:"adjective",gender:null,rank:256},
+  {id:257,spanish:`propio`,english:`own/proper`,exampleSentence:`Tengo mi propio negocio.`,exampleTranslation:`I have my own business.`,type:"adjective",gender:null,rank:257},
+  {id:258,spanish:`mejor`,english:`better/best`,exampleSentence:`Ella es la mejor estudiante de la clase.`,exampleTranslation:`She is the best student in the class.`,type:"adjective",gender:null,rank:258},
+  {id:259,spanish:`primero`,english:`first`,exampleSentence:`Fui el primero en llegar.`,exampleTranslation:`I was the first to arrive.`,type:"adjective",gender:null,rank:259},
+  {id:260,spanish:`pequeño`,english:`small/little`,exampleSentence:`Tenemos un apartamento pequeño.`,exampleTranslation:`We have a small apartment.`,type:"adjective",gender:null,rank:260},
+  {id:261,spanish:`viejo`,english:`old`,exampleSentence:`Este edificio es muy viejo.`,exampleTranslation:`This building is very old.`,type:"adjective",gender:null,rank:261},
+  {id:262,spanish:`joven`,english:`young`,exampleSentence:`Es una empresa muy joven.`,exampleTranslation:`It's a very young company.`,type:"adjective",gender:null,rank:262},
+  {id:263,spanish:`alto`,english:`tall/high`,exampleSentence:`Mi hermano es muy alto.`,exampleTranslation:`My brother is very tall.`,type:"adjective",gender:null,rank:263},
+  {id:264,spanish:`bajo`,english:`low/short`,exampleSentence:`El precio del petróleo está muy bajo.`,exampleTranslation:`The price of oil is very low.`,type:"adjective",gender:null,rank:264},
+  {id:265,spanish:`largo`,english:`long`,exampleSentence:`Es un viaje muy largo.`,exampleTranslation:`It's a very long journey.`,type:"adjective",gender:null,rank:265},
+  {id:266,spanish:`corto`,english:`short`,exampleSentence:`El verano fue muy corto este año.`,exampleTranslation:`The summer was very short this year.`,type:"adjective",gender:null,rank:266},
+  {id:267,spanish:`bonito`,english:`pretty/nice`,exampleSentence:`Qué bonito es ese paisaje.`,exampleTranslation:`What a beautiful landscape that is.`,type:"adjective",gender:null,rank:267},
+  {id:268,spanish:`rico`,english:`rich/delicious`,exampleSentence:`Este postre está muy rico.`,exampleTranslation:`This dessert is very delicious.`,type:"adjective",gender:null,rank:268},
+  {id:269,spanish:`pobre`,english:`poor`,exampleSentence:`Es una familia muy pobre.`,exampleTranslation:`It's a very poor family.`,type:"adjective",gender:null,rank:269},
+  {id:270,spanish:`feliz`,english:`happy`,exampleSentence:`Estoy muy feliz hoy.`,exampleTranslation:`I am very happy today.`,type:"adjective",gender:null,rank:270},
+  {id:271,spanish:`triste`,english:`sad`,exampleSentence:`Se sentía triste después de la noticia.`,exampleTranslation:`She felt sad after the news.`,type:"adjective",gender:null,rank:271},
+  {id:272,spanish:`rápido`,english:`fast/quick`,exampleSentence:`El tren más rápido llega en dos horas.`,exampleTranslation:`The fastest train arrives in two hours.`,type:"adjective",gender:null,rank:272},
+  {id:273,spanish:`lento`,english:`slow`,exampleSentence:`Mi ordenador es muy lento.`,exampleTranslation:`My computer is very slow.`,type:"adjective",gender:null,rank:273},
+  {id:274,spanish:`fácil`,english:`easy`,exampleSentence:`El examen fue bastante fácil.`,exampleTranslation:`The exam was quite easy.`,type:"adjective",gender:null,rank:274},
+  {id:275,spanish:`difícil`,english:`difficult`,exampleSentence:`Es una decisión muy difícil.`,exampleTranslation:`It's a very difficult decision.`,type:"adjective",gender:null,rank:275},
+  {id:276,spanish:`importante`,english:`important`,exampleSentence:`La salud es muy importante.`,exampleTranslation:`Health is very important.`,type:"adjective",gender:null,rank:276},
+  {id:277,spanish:`interesante`,english:`interesting`,exampleSentence:`Fue una conversación muy interesante.`,exampleTranslation:`It was a very interesting conversation.`,type:"adjective",gender:null,rank:277},
+  {id:278,spanish:`fuerte`,english:`strong`,exampleSentence:`Necesitamos a alguien fuerte.`,exampleTranslation:`We need someone strong.`,type:"adjective",gender:null,rank:278},
+  {id:279,spanish:`débil`,english:`weak`,exampleSentence:`Me siento débil después de la gripe.`,exampleTranslation:`I feel weak after the flu.`,type:"adjective",gender:null,rank:279},
+  {id:280,spanish:`caliente`,english:`hot`,exampleSentence:`Ten cuidado, el café está caliente.`,exampleTranslation:`Be careful, the coffee is hot.`,type:"adjective",gender:null,rank:280},
+  {id:281,spanish:`frío`,english:`cold`,exampleSentence:`Hoy hace mucho frío.`,exampleTranslation:`Today it's very cold.`,type:"adjective",gender:null,rank:281},
+  {id:282,spanish:`oscuro`,english:`dark`,exampleSentence:`El cuarto estaba muy oscuro.`,exampleTranslation:`The room was very dark.`,type:"adjective",gender:null,rank:282},
+  {id:283,spanish:`claro`,english:`clear/light`,exampleSentence:`El agua del lago es muy clara.`,exampleTranslation:`The lake water is very clear.`,type:"adjective",gender:null,rank:283},
+  {id:284,spanish:`limpio`,english:`clean`,exampleSentence:`El baño está muy limpio.`,exampleTranslation:`The bathroom is very clean.`,type:"adjective",gender:null,rank:284},
+  {id:285,spanish:`libre`,english:`free`,exampleSentence:`Por fin soy libre de hacer lo que quiero.`,exampleTranslation:`I'm finally free to do what I want.`,type:"adjective",gender:null,rank:285},
+  {id:286,spanish:`lleno`,english:`full`,exampleSentence:`El restaurante está lleno hoy.`,exampleTranslation:`The restaurant is full today.`,type:"adjective",gender:null,rank:286},
+  {id:287,spanish:`real`,english:`real/royal`,exampleSentence:`La historia real es más interesante.`,exampleTranslation:`The real story is more interesting.`,type:"adjective",gender:null,rank:287},
+  {id:288,spanish:`posible`,english:`possible`,exampleSentence:`Todo es posible si trabajas duro.`,exampleTranslation:`Everything is possible if you work hard.`,type:"adjective",gender:null,rank:288},
+  {id:289,spanish:`necesario`,english:`necessary`,exampleSentence:`Es necesario estudiar para el examen.`,exampleTranslation:`It's necessary to study for the exam.`,type:"adjective",gender:null,rank:289},
+  {id:290,spanish:`diferente`,english:`different`,exampleSentence:`Cada persona es diferente.`,exampleTranslation:`Each person is different.`,type:"adjective",gender:null,rank:290},
+  {id:291,spanish:`igual`,english:`equal/same`,exampleSentence:`Todos somos iguales ante la ley.`,exampleTranslation:`We are all equal before the law.`,type:"adjective",gender:null,rank:291},
+  {id:292,spanish:`social`,english:`social`,exampleSentence:`El trabajo social es muy importante.`,exampleTranslation:`Social work is very important.`,type:"adjective",gender:null,rank:292},
+  {id:293,spanish:`político`,english:`political`,exampleSentence:`El clima político está muy tenso.`,exampleTranslation:`The political climate is very tense.`,type:"adjective",gender:null,rank:293},
+  {id:294,spanish:`económico`,english:`economic`,exampleSentence:`El crecimiento económico fue lento.`,exampleTranslation:`Economic growth was slow.`,type:"adjective",gender:null,rank:294},
+  {id:295,spanish:`natural`,english:`natural`,exampleSentence:`La belleza natural del parque es impresionante.`,exampleTranslation:`The natural beauty of the park is impressive.`,type:"adjective",gender:null,rank:295},
+  {id:296,spanish:`nacional`,english:`national`,exampleSentence:`El equipo nacional ganó el campeonato.`,exampleTranslation:`The national team won the championship.`,type:"adjective",gender:null,rank:296},
+  {id:297,spanish:`público`,english:`public`,exampleSentence:`El transporte público es muy bueno aquí.`,exampleTranslation:`Public transport is very good here.`,type:"adjective",gender:null,rank:297},
+  {id:298,spanish:`privado`,english:`private`,exampleSentence:`Tengo una clase privada de piano.`,exampleTranslation:`I have a private piano lesson.`,type:"adjective",gender:null,rank:298},
+  {id:299,spanish:`especial`,english:`special`,exampleSentence:`Hoy es un día muy especial para mí.`,exampleTranslation:`Today is a very special day for me.`,type:"adjective",gender:null,rank:299},
+  {id:300,spanish:`normal`,english:`normal`,exampleSentence:`Es normal sentir nervios antes de hablar en público.`,exampleTranslation:`It's normal to feel nervous before speaking in public.`,type:"adjective",gender:null,rank:300},
+  {id:301,spanish:`principal`,english:`main/principal`,exampleSentence:`Cuéntame la idea principal.`,exampleTranslation:`Tell me the main idea.`,type:"adjective",gender:null,rank:301},
+  {id:302,spanish:`verdadero`,english:`true/real`,exampleSentence:`El verdadero éxito viene del trabajo duro.`,exampleTranslation:`True success comes from hard work.`,type:"adjective",gender:null,rank:302},
+  {id:303,spanish:`moderno`,english:`modern`,exampleSentence:`Vivo en un edificio moderno.`,exampleTranslation:`I live in a modern building.`,type:"adjective",gender:null,rank:303},
+  {id:304,spanish:`único`,english:`unique/only`,exampleSentence:`Este cuadro es único en el mundo.`,exampleTranslation:`This painting is unique in the world.`,type:"adjective",gender:null,rank:304},
+  {id:305,spanish:`ahora`,english:`now`,exampleSentence:`Ahora mismo estoy muy ocupado.`,exampleTranslation:`Right now I'm very busy.`,type:"adverb",gender:null,rank:305},
+  {id:306,spanish:`entonces`,english:`then/so`,exampleSentence:`Si no hay problema, entonces empecemos.`,exampleTranslation:`If there's no problem, then let's start.`,type:"adverb",gender:null,rank:306},
+  {id:307,spanish:`aquí`,english:`here`,exampleSentence:`Aquí está el documento que pediste.`,exampleTranslation:`Here is the document you requested.`,type:"adverb",gender:null,rank:307},
+  {id:308,spanish:`allí`,english:`there`,exampleSentence:`Allí está la tienda que buscas.`,exampleTranslation:`There is the store you're looking for.`,type:"adverb",gender:null,rank:308},
+  {id:309,spanish:`así`,english:`thus/so/this way`,exampleSentence:`Así es como se prepara la paella.`,exampleTranslation:`This is how paella is prepared.`,type:"adverb",gender:null,rank:309},
+  {id:310,spanish:`siempre`,english:`always`,exampleSentence:`Siempre digo la verdad.`,exampleTranslation:`I always tell the truth.`,type:"adverb",gender:null,rank:310},
+  {id:311,spanish:`nunca`,english:`never`,exampleSentence:`Nunca he estado en Japón.`,exampleTranslation:`I have never been to Japan.`,type:"adverb",gender:null,rank:311},
+  {id:312,spanish:`después`,english:`after/later`,exampleSentence:`Después del trabajo voy al gimnasio.`,exampleTranslation:`After work I go to the gym.`,type:"adverb",gender:null,rank:312},
+  {id:313,spanish:`antes`,english:`before`,exampleSentence:`Llegamos antes de que empezara la lluvia.`,exampleTranslation:`We arrived before the rain started.`,type:"adverb",gender:null,rank:313},
+  {id:314,spanish:`menos`,english:`less/fewer`,exampleSentence:`Hoy tengo menos trabajo que ayer.`,exampleTranslation:`Today I have less work than yesterday.`,type:"adverb",gender:null,rank:314},
+  {id:315,spanish:`tampoco`,english:`neither/nor either`,exampleSentence:`Yo tampoco quiero ir.`,exampleTranslation:`I don't want to go either.`,type:"adverb",gender:null,rank:315},
+  {id:316,spanish:`solo`,english:`only/alone`,exampleSentence:`Solo quiero descansar un poco.`,exampleTranslation:`I only want to rest a little.`,type:"adverb",gender:null,rank:316},
+  {id:317,spanish:`bastante`,english:`quite/enough`,exampleSentence:`Ya es bastante tarde para llamar.`,exampleTranslation:`It's already quite late to call.`,type:"adverb",gender:null,rank:317},
+  {id:318,spanish:`demasiado`,english:`too much/too many`,exampleSentence:`Comí demasiado en la cena.`,exampleTranslation:`I ate too much at dinner.`,type:"adverb",gender:null,rank:318},
+  {id:319,spanish:`casi`,english:`almost/nearly`,exampleSentence:`Ya casi terminé el trabajo.`,exampleTranslation:`I almost finished the work.`,type:"adverb",gender:null,rank:319},
+  {id:320,spanish:`todavía`,english:`still/yet`,exampleSentence:`¿Todavía estás en la oficina?`,exampleTranslation:`Are you still in the office?`,type:"adverb",gender:null,rank:320},
+  {id:321,spanish:`aún`,english:`still/even`,exampleSentence:`Aún no he recibido respuesta.`,exampleTranslation:`I still haven't received a response.`,type:"adverb",gender:null,rank:321},
+  {id:322,spanish:`pronto`,english:`soon`,exampleSentence:`El verano llegará pronto.`,exampleTranslation:`Summer will come soon.`,type:"adverb",gender:null,rank:322},
+  {id:323,spanish:`tarde`,english:`late`,exampleSentence:`Llegué tarde a la reunión.`,exampleTranslation:`I arrived late to the meeting.`,type:"adverb",gender:null,rank:323},
+  {id:324,spanish:`temprano`,english:`early`,exampleSentence:`Mañana me levanto temprano.`,exampleTranslation:`Tomorrow I'll get up early.`,type:"adverb",gender:null,rank:324},
+  {id:325,spanish:`cerca`,english:`near/close`,exampleSentence:`El banco está cerca de aquí.`,exampleTranslation:`The bank is near here.`,type:"adverb",gender:null,rank:325},
+  {id:326,spanish:`lejos`,english:`far/far away`,exampleSentence:`El aeropuerto está bastante lejos.`,exampleTranslation:`The airport is quite far.`,type:"adverb",gender:null,rank:326},
+  {id:327,spanish:`arriba`,english:`up/above`,exampleSentence:`El apartamento está arriba.`,exampleTranslation:`The apartment is upstairs.`,type:"adverb",gender:null,rank:327},
+  {id:328,spanish:`abajo`,english:`down/below`,exampleSentence:`El garaje está abajo.`,exampleTranslation:`The garage is downstairs.`,type:"adverb",gender:null,rank:328},
+  {id:329,spanish:`dentro`,english:`inside/within`,exampleSentence:`Los documentos están dentro del cajón.`,exampleTranslation:`The documents are inside the drawer.`,type:"adverb",gender:null,rank:329},
+  {id:330,spanish:`fuera`,english:`outside/out`,exampleSentence:`El perro está fuera en el jardín.`,exampleTranslation:`The dog is outside in the garden.`,type:"adverb",gender:null,rank:330},
+  {id:331,spanish:`especialmente`,english:`especially`,exampleSentence:`Me gustan los idiomas, especialmente el español.`,exampleTranslation:`I like languages, especially Spanish.`,type:"adverb",gender:null,rank:331},
+  {id:332,spanish:`realmente`,english:`really/truly`,exampleSentence:`Realmente no sé qué hacer.`,exampleTranslation:`I really don't know what to do.`,type:"adverb",gender:null,rank:332},
+  {id:333,spanish:`finalmente`,english:`finally`,exampleSentence:`Finalmente llegamos a nuestro destino.`,exampleTranslation:`We finally arrived at our destination.`,type:"adverb",gender:null,rank:333},
+  {id:334,spanish:`generalmente`,english:`generally`,exampleSentence:`Generalmente me despierto a las siete.`,exampleTranslation:`I generally wake up at seven.`,type:"adverb",gender:null,rank:334},
+  {id:335,spanish:`completamente`,english:`completely`,exampleSentence:`Estoy completamente de acuerdo contigo.`,exampleTranslation:`I completely agree with you.`,type:"adverb",gender:null,rank:335},
+  {id:336,spanish:`además`,english:`furthermore/also`,exampleSentence:`Además, necesitamos más tiempo para el proyecto.`,exampleTranslation:`Furthermore, we need more time for the project.`,type:"adverb",gender:null,rank:336},
+  {id:337,spanish:`mientras`,english:`while/whereas`,exampleSentence:`Escucho música mientras trabajo.`,exampleTranslation:`I listen to music while I work.`,type:"conjunction",gender:null,rank:337},
+  {id:338,spanish:`quizás`,english:`maybe/perhaps`,exampleSentence:`Quizás mañana pueda verte.`,exampleTranslation:`Perhaps I can see you tomorrow.`,type:"adverb",gender:null,rank:338},
+  {id:339,spanish:`aunque`,english:`although/even though`,exampleSentence:`Aunque llueve, voy a salir.`,exampleTranslation:`Although it rains, I'm going to go out.`,type:"conjunction",gender:null,rank:339},
+  {id:340,spanish:`hoy`,english:`today`,exampleSentence:`Hoy es un día muy importante.`,exampleTranslation:`Today is a very important day.`,type:"adverb",gender:null,rank:340},
+  {id:341,spanish:`ayer`,english:`yesterday`,exampleSentence:`Ayer fui al cine con mis amigos.`,exampleTranslation:`Yesterday I went to the movies with my friends.`,type:"adverb",gender:null,rank:341},
+  {id:342,spanish:`mañana`,english:`tomorrow/morning`,exampleSentence:`Mañana tengo una entrevista de trabajo.`,exampleTranslation:`Tomorrow I have a job interview.`,type:"adverb",gender:null,rank:342},
+  {id:343,spanish:`amor`,english:`love`,exampleSentence:`El amor es lo más poderoso del mundo.`,exampleTranslation:`Love is the most powerful thing in the world.`,type:"noun",gender:"masculine",rank:343},
+  {id:344,spanish:`miedo`,english:`fear`,exampleSentence:`Tengo miedo de las alturas.`,exampleTranslation:`I'm afraid of heights.`,type:"noun",gender:"masculine",rank:344},
+  {id:345,spanish:`paz`,english:`peace`,exampleSentence:`Necesito un poco de paz y tranquilidad.`,exampleTranslation:`I need a little peace and quiet.`,type:"noun",gender:"feminine",rank:345},
+  {id:346,spanish:`guerra`,english:`war`,exampleSentence:`La guerra dejó muchas cicatrices en el país.`,exampleTranslation:`The war left many scars on the country.`,type:"noun",gender:"feminine",rank:346},
+  {id:347,spanish:`ley`,english:`law`,exampleSentence:`Todos debemos respetar la ley.`,exampleTranslation:`We must all respect the law.`,type:"noun",gender:"feminine",rank:347},
+  {id:348,spanish:`empresa`,english:`company/firm`,exampleSentence:`Trabajo en una empresa multinacional.`,exampleTranslation:`I work at a multinational company.`,type:"noun",gender:"feminine",rank:348},
+  {id:349,spanish:`mercado`,english:`market`,exampleSentence:`Voy al mercado todos los sábados.`,exampleTranslation:`I go to the market every Saturday.`,type:"noun",gender:"masculine",rank:349},
+  {id:350,spanish:`idea`,english:`idea`,exampleSentence:`Tuve una idea brillante para el proyecto.`,exampleTranslation:`I had a brilliant idea for the project.`,type:"noun",gender:"feminine",rank:350},
+  {id:351,spanish:`edad`,english:`age`,exampleSentence:`¿Qué edad tienes?`,exampleTranslation:`How old are you?`,type:"noun",gender:"feminine",rank:351},
+  {id:352,spanish:`color`,english:`color`,exampleSentence:`¿Cuál es tu color favorito?`,exampleTranslation:`What is your favorite color?`,type:"noun",gender:"masculine",rank:352},
+  {id:353,spanish:`información`,english:`information`,exampleSentence:`Necesito más información sobre este tema.`,exampleTranslation:`I need more information on this topic.`,type:"noun",gender:"feminine",rank:353},
+  {id:354,spanish:`cultura`,english:`culture`,exampleSentence:`La cultura española es muy rica.`,exampleTranslation:`Spanish culture is very rich.`,type:"noun",gender:"feminine",rank:354},
+  {id:355,spanish:`economía`,english:`economy`,exampleSentence:`La economía del país creció este año.`,exampleTranslation:`The country's economy grew this year.`,type:"noun",gender:"feminine",rank:355},
+  {id:356,spanish:`ciencia`,english:`science`,exampleSentence:`La ciencia avanza muy rápidamente.`,exampleTranslation:`Science advances very quickly.`,type:"noun",gender:"feminine",rank:356},
+  {id:357,spanish:`tecnología`,english:`technology`,exampleSentence:`La tecnología cambia nuestras vidas.`,exampleTranslation:`Technology changes our lives.`,type:"noun",gender:"feminine",rank:357},
+  {id:358,spanish:`educación`,english:`education`,exampleSentence:`La educación es clave para el futuro.`,exampleTranslation:`Education is key for the future.`,type:"noun",gender:"feminine",rank:358},
+  {id:359,spanish:`salud`,english:`health`,exampleSentence:`La salud es lo más importante.`,exampleTranslation:`Health is the most important thing.`,type:"noun",gender:"feminine",rank:359},
+  {id:360,spanish:`mente`,english:`mind`,exampleSentence:`Una mente abierta aprende más.`,exampleTranslation:`An open mind learns more.`,type:"noun",gender:"feminine",rank:360},
+  {id:361,spanish:`alma`,english:`soul`,exampleSentence:`El alma de la fiesta fue ella.`,exampleTranslation:`She was the life of the party.`,type:"noun",gender:"feminine",rank:361},
+  {id:362,spanish:`voz`,english:`voice`,exampleSentence:`Tiene una voz muy bonita.`,exampleTranslation:`She has a very beautiful voice.`,type:"noun",gender:"feminine",rank:362},
+  {id:363,spanish:`lengua`,english:`language/tongue`,exampleSentence:`El español es mi lengua materna.`,exampleTranslation:`Spanish is my mother tongue.`,type:"noun",gender:"feminine",rank:363},
+  {id:364,spanish:`palabra`,english:`word`,exampleSentence:`No encuentro la palabra adecuada.`,exampleTranslation:`I can't find the right word.`,type:"noun",gender:"feminine",rank:364},
+  {id:365,spanish:`imagen`,english:`image/picture`,exampleSentence:`Esta imagen vale más que mil palabras.`,exampleTranslation:`This image is worth more than a thousand words.`,type:"noun",gender:"feminine",rank:365},
+  {id:366,spanish:`canción`,english:`song`,exampleSentence:`Mi canción favorita es de los Beatles.`,exampleTranslation:`My favorite song is by the Beatles.`,type:"noun",gender:"feminine",rank:366},
+  {id:367,spanish:`viaje`,english:`trip/journey`,exampleSentence:`Planeamos un viaje a Sudamérica.`,exampleTranslation:`We're planning a trip to South America.`,type:"noun",gender:"masculine",rank:367},
+  {id:368,spanish:`camino`,english:`road/path`,exampleSentence:`El camino al éxito no es fácil.`,exampleTranslation:`The path to success is not easy.`,type:"noun",gender:"masculine",rank:368},
+  {id:369,spanish:`puente`,english:`bridge`,exampleSentence:`Cruzamos el puente sobre el río.`,exampleTranslation:`We crossed the bridge over the river.`,type:"noun",gender:"masculine",rank:369},
+  {id:370,spanish:`isla`,english:`island`,exampleSentence:`Vivir en una isla es mi sueño.`,exampleTranslation:`Living on an island is my dream.`,type:"noun",gender:"feminine",rank:370},
+  {id:371,spanish:`bosque`,english:`forest`,exampleSentence:`Paseamos por el bosque en otoño.`,exampleTranslation:`We walked through the forest in autumn.`,type:"noun",gender:"masculine",rank:371},
+  {id:372,spanish:`campo`,english:`field/countryside`,exampleSentence:`Pasé el verano en el campo.`,exampleTranslation:`I spent the summer in the countryside.`,type:"noun",gender:"masculine",rank:372},
+  {id:373,spanish:`flor`,english:`flower`,exampleSentence:`La flor del cerezo es muy hermosa.`,exampleTranslation:`The cherry blossom is very beautiful.`,type:"noun",gender:"feminine",rank:373},
+  {id:374,spanish:`árbol`,english:`tree`,exampleSentence:`El árbol tiene muchos años.`,exampleTranslation:`The tree is many years old.`,type:"noun",gender:"masculine",rank:374},
+  {id:375,spanish:`animal`,english:`animal`,exampleSentence:`El perro es el animal más leal.`,exampleTranslation:`The dog is the most loyal animal.`,type:"noun",gender:"masculine",rank:375},
+  {id:376,spanish:`perro`,english:`dog`,exampleSentence:`Mi perro se llama Max.`,exampleTranslation:`My dog's name is Max.`,type:"noun",gender:"masculine",rank:376},
+  {id:377,spanish:`gato`,english:`cat`,exampleSentence:`El gato duerme todo el día.`,exampleTranslation:`The cat sleeps all day.`,type:"noun",gender:"masculine",rank:377},
+  {id:378,spanish:`pájaro`,english:`bird`,exampleSentence:`El pájaro cantó toda la mañana.`,exampleTranslation:`The bird sang all morning.`,type:"noun",gender:"masculine",rank:378},
+  {id:379,spanish:`caballo`,english:`horse`,exampleSentence:`El caballo corrió muy rápido.`,exampleTranslation:`The horse ran very fast.`,type:"noun",gender:"masculine",rank:379},
+  {id:380,spanish:`comida`,english:`food/meal`,exampleSentence:`La comida española es deliciosa.`,exampleTranslation:`Spanish food is delicious.`,type:"noun",gender:"feminine",rank:380},
+  {id:381,spanish:`pan`,english:`bread`,exampleSentence:`¿Quieres un poco de pan?`,exampleTranslation:`Do you want some bread?`,type:"noun",gender:"masculine",rank:381},
+  {id:382,spanish:`leche`,english:`milk`,exampleSentence:`Me gusta el café con leche.`,exampleTranslation:`I like coffee with milk.`,type:"noun",gender:"feminine",rank:382},
+  {id:383,spanish:`vino`,english:`wine`,exampleSentence:`¿Me recomiendas un buen vino?`,exampleTranslation:`Can you recommend a good wine?`,type:"noun",gender:"masculine",rank:383},
+  {id:384,spanish:`café`,english:`coffee`,exampleSentence:`Me tomo un café cada mañana.`,exampleTranslation:`I have a coffee every morning.`,type:"noun",gender:"masculine",rank:384},
+  {id:385,spanish:`ropa`,english:`clothes/clothing`,exampleSentence:`Necesito comprar ropa de invierno.`,exampleTranslation:`I need to buy winter clothes.`,type:"noun",gender:"feminine",rank:385},
+  {id:386,spanish:`reloj`,english:`watch/clock`,exampleSentence:`Mi reloj se quedó sin batería.`,exampleTranslation:`My watch ran out of battery.`,type:"noun",gender:"masculine",rank:386},
+  {id:387,spanish:`ventana`,english:`window`,exampleSentence:`Abre la ventana para ventilar.`,exampleTranslation:`Open the window to ventilate.`,type:"noun",gender:"feminine",rank:387},
+  {id:388,spanish:`jardín`,english:`garden`,exampleSentence:`Cultivo flores en mi jardín.`,exampleTranslation:`I grow flowers in my garden.`,type:"noun",gender:"masculine",rank:388},
+  {id:389,spanish:`baño`,english:`bathroom`,exampleSentence:`El baño está al fondo del pasillo.`,exampleTranslation:`The bathroom is at the end of the hallway.`,type:"noun",gender:"masculine",rank:389},
+  {id:390,spanish:`oficina`,english:`office`,exampleSentence:`Mi oficina está en el décimo piso.`,exampleTranslation:`My office is on the tenth floor.`,type:"noun",gender:"feminine",rank:390},
+  {id:391,spanish:`tienda`,english:`store/shop`,exampleSentence:`La tienda cierra a las nueve.`,exampleTranslation:`The store closes at nine.`,type:"noun",gender:"feminine",rank:391},
+  {id:392,spanish:`aeropuerto`,english:`airport`,exampleSentence:`Llegamos al aeropuerto con tiempo.`,exampleTranslation:`We arrived at the airport with time.`,type:"noun",gender:"masculine",rank:392},
+  {id:393,spanish:`hotel`,english:`hotel`,exampleSentence:`El hotel tiene una vista increíble.`,exampleTranslation:`The hotel has an incredible view.`,type:"noun",gender:"masculine",rank:393},
+  {id:394,spanish:`banco`,english:`bank`,exampleSentence:`Tengo que ir al banco hoy.`,exampleTranslation:`I have to go to the bank today.`,type:"noun",gender:"masculine",rank:394},
+  {id:395,spanish:`museo`,english:`museum`,exampleSentence:`Visitamos el museo de arte moderno.`,exampleTranslation:`We visited the modern art museum.`,type:"noun",gender:"masculine",rank:395},
+  {id:396,spanish:`iglesia`,english:`church`,exampleSentence:`La iglesia es muy antigua.`,exampleTranslation:`The church is very old.`,type:"noun",gender:"feminine",rank:396},
+  {id:397,spanish:`aprender`,english:`to learn`,exampleSentence:`Quiero aprender a tocar el piano.`,exampleTranslation:`I want to learn to play the piano.`,type:"verb",gender:null,rank:397},
+  {id:398,spanish:`enseñar`,english:`to teach/show`,exampleSentence:`Me encanta enseñar a los niños.`,exampleTranslation:`I love teaching children.`,type:"verb",gender:null,rank:398},
+  {id:399,spanish:`comprender`,english:`to understand/comprehend`,exampleSentence:`Es difícil comprender esta teoría.`,exampleTranslation:`It's difficult to understand this theory.`,type:"verb",gender:null,rank:399},
+  {id:400,spanish:`conseguir`,english:`to get/achieve`,exampleSentence:`Conseguí el trabajo que quería.`,exampleTranslation:`I got the job I wanted.`,type:"verb",gender:null,rank:400},
+  {id:401,spanish:`continuar`,english:`to continue`,exampleSentence:`Hay que continuar trabajando duro.`,exampleTranslation:`We must continue working hard.`,type:"verb",gender:null,rank:401},
+  {id:402,spanish:`aumentar`,english:`to increase`,exampleSentence:`El precio del petróleo aumentó.`,exampleTranslation:`The price of oil increased.`,type:"verb",gender:null,rank:402},
+  {id:403,spanish:`mejorar`,english:`to improve`,exampleSentence:`Quiero mejorar mi nivel de inglés.`,exampleTranslation:`I want to improve my English level.`,type:"verb",gender:null,rank:403},
+  {id:404,spanish:`desarrollar`,english:`to develop`,exampleSentence:`Debemos desarrollar nuevas habilidades.`,exampleTranslation:`We must develop new skills.`,type:"verb",gender:null,rank:404},
+  {id:405,spanish:`permitir`,english:`to allow/permit`,exampleSentence:`No me permiten entrar sin cita.`,exampleTranslation:`They don't allow me to enter without an appointment.`,type:"verb",gender:null,rank:405},
+  {id:406,spanish:`resultar`,english:`to result/turn out`,exampleSentence:`Resultó ser más difícil de lo esperado.`,exampleTranslation:`It turned out to be harder than expected.`,type:"verb",gender:null,rank:406},
+  {id:407,spanish:`ocurrir`,english:`to occur/happen`,exampleSentence:`¿Qué ocurrió en la reunión?`,exampleTranslation:`What happened at the meeting?`,type:"verb",gender:null,rank:407},
+  {id:408,spanish:`ofrecer`,english:`to offer`,exampleSentence:`Me ofrecieron un trabajo nuevo.`,exampleTranslation:`They offered me a new job.`,type:"verb",gender:null,rank:408},
+  {id:409,spanish:`considerar`,english:`to consider`,exampleSentence:`Deberías considerar otras opciones.`,exampleTranslation:`You should consider other options.`,type:"verb",gender:null,rank:409},
+  {id:410,spanish:`proponer`,english:`to propose/suggest`,exampleSentence:`Quiero proponer una idea nueva.`,exampleTranslation:`I want to propose a new idea.`,type:"verb",gender:null,rank:410},
+  {id:411,spanish:`aceptar`,english:`to accept`,exampleSentence:`No puedo aceptar esta oferta.`,exampleTranslation:`I can't accept this offer.`,type:"verb",gender:null,rank:411},
+  {id:412,spanish:`intentar`,english:`to try/attempt`,exampleSentence:`Siempre intento hacer lo correcto.`,exampleTranslation:`I always try to do the right thing.`,type:"verb",gender:null,rank:412},
+  {id:413,spanish:`alcanzar`,english:`to reach/achieve`,exampleSentence:`Alcanzamos la cima de la montaña.`,exampleTranslation:`We reached the top of the mountain.`,type:"verb",gender:null,rank:413},
+  {id:414,spanish:`crecer`,english:`to grow`,exampleSentence:`Los niños crecen muy rápido.`,exampleTranslation:`Children grow very fast.`,type:"verb",gender:null,rank:414},
+  {id:415,spanish:`nacer`,english:`to be born`,exampleSentence:`Nació en Madrid hace treinta años.`,exampleTranslation:`She was born in Madrid thirty years ago.`,type:"verb",gender:null,rank:415},
+  {id:416,spanish:`cerrar`,english:`to close`,exampleSentence:`Por favor, cierra la puerta.`,exampleTranslation:`Please close the door.`,type:"verb",gender:null,rank:416},
+  {id:417,spanish:`construir`,english:`to build/construct`,exampleSentence:`Van a construir un nuevo puente.`,exampleTranslation:`They are going to build a new bridge.`,type:"verb",gender:null,rank:417},
+  {id:418,spanish:`proteger`,english:`to protect`,exampleSentence:`Debemos proteger el medio ambiente.`,exampleTranslation:`We must protect the environment.`,type:"verb",gender:null,rank:418},
+  {id:419,spanish:`pagar`,english:`to pay`,exampleSentence:`Tengo que pagar el alquiler hoy.`,exampleTranslation:`I have to pay the rent today.`,type:"verb",gender:null,rank:419},
+  {id:420,spanish:`cobrar`,english:`to charge/collect`,exampleSentence:`El fontanero cobró demasiado.`,exampleTranslation:`The plumber charged too much.`,type:"verb",gender:null,rank:420},
+  {id:421,spanish:`extraño`,english:`strange/weird`,exampleSentence:`Es un sabor muy extraño.`,exampleTranslation:`It's a very strange flavor.`,type:"adjective",gender:null,rank:421},
+  {id:422,spanish:`famoso`,english:`famous`,exampleSentence:`Es un actor famoso en todo el mundo.`,exampleTranslation:`He's a famous actor worldwide.`,type:"adjective",gender:null,rank:422},
+  {id:423,spanish:`popular`,english:`popular`,exampleSentence:`Esta canción es muy popular.`,exampleTranslation:`This song is very popular.`,type:"adjective",gender:null,rank:423},
+  {id:424,spanish:`oficial`,english:`official`,exampleSentence:`El idioma oficial es el español.`,exampleTranslation:`The official language is Spanish.`,type:"adjective",gender:null,rank:424},
+  {id:425,spanish:`personal`,english:`personal`,exampleSentence:`Es una opinión muy personal.`,exampleTranslation:`It's a very personal opinion.`,type:"adjective",gender:null,rank:425},
+  {id:426,spanish:`general`,english:`general`,exampleSentence:`En general, estoy de acuerdo.`,exampleTranslation:`In general, I agree.`,type:"adjective",gender:null,rank:426},
+  {id:427,spanish:`local`,english:`local`,exampleSentence:`Prefiero apoyar el comercio local.`,exampleTranslation:`I prefer to support local commerce.`,type:"adjective",gender:null,rank:427},
+  {id:428,spanish:`internacional`,english:`international`,exampleSentence:`La empresa tiene un alcance internacional.`,exampleTranslation:`The company has an international reach.`,type:"adjective",gender:null,rank:428},
+  {id:429,spanish:`antiguo`,english:`ancient/old/former`,exampleSentence:`Este castillo es muy antiguo.`,exampleTranslation:`This castle is very old.`,type:"adjective",gender:null,rank:429},
+  {id:430,spanish:`siguiente`,english:`next/following`,exampleSentence:`El siguiente paso es practicar.`,exampleTranslation:`The next step is to practice.`,type:"adjective",gender:null,rank:430},
+  {id:431,spanish:`próximo`,english:`next/near`,exampleSentence:`El próximo tren sale a las tres.`,exampleTranslation:`The next train leaves at three.`,type:"adjective",gender:null,rank:431},
+  {id:432,spanish:`actual`,english:`current/present`,exampleSentence:`El presidente actual tiene mucho apoyo.`,exampleTranslation:`The current president has a lot of support.`,type:"adjective",gender:null,rank:432},
+  {id:433,spanish:`seguro`,english:`safe/certain/sure`,exampleSentence:`Estoy seguro de que es correcto.`,exampleTranslation:`I'm sure it's correct.`,type:"adjective",gender:null,rank:433},
+  {id:434,spanish:`conocido`,english:`known/well-known`,exampleSentence:`Es un escritor muy conocido.`,exampleTranslation:`He's a well-known writer.`,type:"adjective",gender:null,rank:434},
+  {id:435,spanish:`sano`,english:`healthy/wholesome`,exampleSentence:`Llevar una dieta sana es importante.`,exampleTranslation:`Eating a healthy diet is important.`,type:"adjective",gender:null,rank:435},
+  {id:436,spanish:`enfermo`,english:`sick/ill`,exampleSentence:`Me quedé en casa porque estaba enfermo.`,exampleTranslation:`I stayed home because I was sick.`,type:"adjective",gender:null,rank:436},
+  {id:437,spanish:`inteligente`,english:`intelligent/smart`,exampleSentence:`Es una niña muy inteligente.`,exampleTranslation:`She's a very intelligent girl.`,type:"adjective",gender:null,rank:437},
+  {id:438,spanish:`amable`,english:`kind/friendly`,exampleSentence:`La recepcionista fue muy amable.`,exampleTranslation:`The receptionist was very kind.`,type:"adjective",gender:null,rank:438},
+  {id:439,spanish:`tranquilo`,english:`calm/quiet`,exampleSentence:`Encontré un lugar tranquilo para estudiar.`,exampleTranslation:`I found a quiet place to study.`,type:"adjective",gender:null,rank:439},
+  {id:440,spanish:`nervioso`,english:`nervous/anxious`,exampleSentence:`Estoy nervioso por la entrevista.`,exampleTranslation:`I'm nervous about the interview.`,type:"adjective",gender:null,rank:440},
+  {id:441,spanish:`cansado`,english:`tired/exhausted`,exampleSentence:`Estoy muy cansado después del viaje.`,exampleTranslation:`I'm very tired after the trip.`,type:"adjective",gender:null,rank:441},
+  {id:442,spanish:`contento`,english:`content/pleased`,exampleSentence:`Estoy muy contento con mi trabajo.`,exampleTranslation:`I'm very happy with my job.`,type:"adjective",gender:null,rank:442},
+  {id:443,spanish:`orgulloso`,english:`proud`,exampleSentence:`Me siento orgulloso de mis logros.`,exampleTranslation:`I feel proud of my achievements.`,type:"adjective",gender:null,rank:443},
+  {id:444,spanish:`serio`,english:`serious`,exampleSentence:`Este es un asunto muy serio.`,exampleTranslation:`This is a very serious matter.`,type:"adjective",gender:null,rank:444},
+  {id:445,spanish:`gracioso`,english:`funny/amusing`,exampleSentence:`Contó un chiste muy gracioso.`,exampleTranslation:`He told a very funny joke.`,type:"adjective",gender:null,rank:445},
+  {id:446,spanish:`maravilloso`,english:`wonderful/marvelous`,exampleSentence:`Fue una experiencia maravillosa.`,exampleTranslation:`It was a wonderful experience.`,type:"adjective",gender:null,rank:446},
+  {id:447,spanish:`terrible`,english:`terrible/awful`,exampleSentence:`Ese accidente fue terrible.`,exampleTranslation:`That accident was terrible.`,type:"adjective",gender:null,rank:447},
+  {id:448,spanish:`perfecto`,english:`perfect`,exampleSentence:`La actuación fue perfecta.`,exampleTranslation:`The performance was perfect.`,type:"adjective",gender:null,rank:448},
+  {id:449,spanish:`simple`,english:`simple`,exampleSentence:`La solución es muy simple.`,exampleTranslation:`The solution is very simple.`,type:"adjective",gender:null,rank:449},
+  {id:450,spanish:`complejo`,english:`complex/complicated`,exampleSentence:`Es un problema muy complejo.`,exampleTranslation:`It's a very complex problem.`,type:"adjective",gender:null,rank:450},
+  {id:451,spanish:`religioso`,english:`religious`,exampleSentence:`Es un hombre muy religioso.`,exampleTranslation:`He's a very religious man.`,type:"adjective",gender:null,rank:451},
+  {id:452,spanish:`cultural`,english:`cultural`,exampleSentence:`El festival es un evento cultural.`,exampleTranslation:`The festival is a cultural event.`,type:"adjective",gender:null,rank:452},
+  {id:453,spanish:`científico`,english:`scientific`,exampleSentence:`El descubrimiento fue muy científico.`,exampleTranslation:`The discovery was very scientific.`,type:"adjective",gender:null,rank:453},
+  {id:454,spanish:`tecnológico`,english:`technological`,exampleSentence:`El avance tecnológico es imparable.`,exampleTranslation:`Technological progress is unstoppable.`,type:"adjective",gender:null,rank:454},
+  {id:455,spanish:`histórico`,english:`historical/historic`,exampleSentence:`Es un momento histórico para el país.`,exampleTranslation:`It's a historic moment for the country.`,type:"adjective",gender:null,rank:455},
+  {id:456,spanish:`geográfico`,english:`geographical`,exampleSentence:`La posición geográfica es estratégica.`,exampleTranslation:`The geographical position is strategic.`,type:"adjective",gender:null,rank:456},
+  {id:457,spanish:`literario`,english:`literary`,exampleSentence:`Tiene un estilo literario muy particular.`,exampleTranslation:`He has a very particular literary style.`,type:"adjective",gender:null,rank:457},
+  {id:458,spanish:`musical`,english:`musical`,exampleSentence:`Tiene un talento musical increíble.`,exampleTranslation:`She has incredible musical talent.`,type:"adjective",gender:null,rank:458},
+  {id:459,spanish:`religión`,english:`religion`,exampleSentence:`La religión influye en la cultura.`,exampleTranslation:`Religion influences culture.`,type:"noun",gender:"feminine",rank:459},
+  {id:460,spanish:`política`,english:`politics`,exampleSentence:`La política es un tema complicado.`,exampleTranslation:`Politics is a complicated topic.`,type:"noun",gender:"feminine",rank:460},
+  {id:461,spanish:`fuerza`,english:`force/strength`,exampleSentence:`Usa la fuerza para abrir el frasco.`,exampleTranslation:`Use force to open the jar.`,type:"noun",gender:"feminine",rank:461},
+  {id:462,spanish:`energía`,english:`energy`,exampleSentence:`La energía solar es renovable.`,exampleTranslation:`Solar energy is renewable.`,type:"noun",gender:"feminine",rank:462},
+  {id:463,spanish:`espacio`,english:`space/room`,exampleSentence:`Necesito más espacio para trabajar.`,exampleTranslation:`I need more space to work.`,type:"noun",gender:"masculine",rank:463},
+  {id:464,spanish:`resultado`,english:`result/outcome`,exampleSentence:`El resultado del examen fue bueno.`,exampleTranslation:`The exam result was good.`,type:"noun",gender:"masculine",rank:464},
+  {id:465,spanish:`movimiento`,english:`movement`,exampleSentence:`El movimiento de derechos fue importante.`,exampleTranslation:`The rights movement was important.`,type:"noun",gender:"masculine",rank:465},
+  {id:466,spanish:`desarrollo`,english:`development`,exampleSentence:`El desarrollo sostenible es clave.`,exampleTranslation:`Sustainable development is key.`,type:"noun",gender:"masculine",rank:466},
+  {id:467,spanish:`población`,english:`population`,exampleSentence:`La población de la ciudad crece.`,exampleTranslation:`The city's population is growing.`,type:"noun",gender:"feminine",rank:467},
+  {id:468,spanish:`comunidad`,english:`community`,exampleSentence:`Vivimos en una comunidad unida.`,exampleTranslation:`We live in a united community.`,type:"noun",gender:"feminine",rank:468},
+  {id:469,spanish:`región`,english:`region`,exampleSentence:`Esta región es famosa por su vino.`,exampleTranslation:`This region is famous for its wine.`,type:"noun",gender:"feminine",rank:469},
+  {id:470,spanish:`capital`,english:`capital city`,exampleSentence:`Madrid es la capital de España.`,exampleTranslation:`Madrid is the capital of Spain.`,type:"noun",gender:"feminine",rank:470},
+  {id:471,spanish:`clase`,english:`class/lesson`,exampleSentence:`La clase de español empieza a las nueve.`,exampleTranslation:`The Spanish class starts at nine.`,type:"noun",gender:"feminine",rank:471},
+  {id:472,spanish:`modelo`,english:`model/example`,exampleSentence:`Es el modelo a seguir.`,exampleTranslation:`He is the role model to follow.`,type:"noun",gender:"masculine",rank:472},
+  {id:473,spanish:`programa`,english:`program/show`,exampleSentence:`El programa de televisión es muy bueno.`,exampleTranslation:`The television program is very good.`,type:"noun",gender:"masculine",rank:473},
+  {id:474,spanish:`proyecto`,english:`project`,exampleSentence:`Nuestro proyecto está casi terminado.`,exampleTranslation:`Our project is almost finished.`,type:"noun",gender:"masculine",rank:474},
+  {id:475,spanish:`servicio`,english:`service`,exampleSentence:`El servicio del restaurante fue excelente.`,exampleTranslation:`The restaurant service was excellent.`,type:"noun",gender:"masculine",rank:475},
+  {id:476,spanish:`precio`,english:`price`,exampleSentence:`El precio de la fruta ha subido.`,exampleTranslation:`The price of fruit has gone up.`,type:"noun",gender:"masculine",rank:476},
+  {id:477,spanish:`producto`,english:`product`,exampleSentence:`Este producto es de buena calidad.`,exampleTranslation:`This product is of good quality.`,type:"noun",gender:"masculine",rank:477},
+  {id:478,spanish:`industria`,english:`industry`,exampleSentence:`La industria del turismo es importante.`,exampleTranslation:`The tourism industry is important.`,type:"noun",gender:"feminine",rank:478},
+  {id:479,spanish:`recurso`,english:`resource`,exampleSentence:`El agua es un recurso valioso.`,exampleTranslation:`Water is a valuable resource.`,type:"noun",gender:"masculine",rank:479},
+  {id:480,spanish:`ambiente`,english:`environment/atmosphere`,exampleSentence:`Hay que cuidar el ambiente.`,exampleTranslation:`We must take care of the environment.`,type:"noun",gender:"masculine",rank:480},
+  {id:481,spanish:`acuerdo`,english:`agreement`,exampleSentence:`Llegamos a un acuerdo.`,exampleTranslation:`We reached an agreement.`,type:"noun",gender:"masculine",rank:481},
+  {id:482,spanish:`reunión`,english:`meeting`,exampleSentence:`La reunión empezó a las diez.`,exampleTranslation:`The meeting started at ten.`,type:"noun",gender:"feminine",rank:482},
+  {id:483,spanish:`equipo`,english:`team/equipment`,exampleSentence:`Nuestro equipo ganó el partido.`,exampleTranslation:`Our team won the match.`,type:"noun",gender:"masculine",rank:483},
+  {id:484,spanish:`partido`,english:`party/match/game`,exampleSentence:`El partido de fútbol fue emocionante.`,exampleTranslation:`The soccer match was exciting.`,type:"noun",gender:"masculine",rank:484},
+  {id:485,spanish:`jugador`,english:`player`,exampleSentence:`Ese jugador es el mejor del equipo.`,exampleTranslation:`That player is the best on the team.`,type:"noun",gender:"masculine",rank:485},
+  {id:486,spanish:`victoria`,english:`victory`,exampleSentence:`La victoria fue muy emocionante.`,exampleTranslation:`The victory was very exciting.`,type:"noun",gender:"feminine",rank:486},
+  {id:487,spanish:`premio`,english:`prize/award`,exampleSentence:`Ganó el premio nacional de literatura.`,exampleTranslation:`She won the national literature prize.`,type:"noun",gender:"masculine",rank:487},
+  {id:488,spanish:`zona`,english:`zone/area`,exampleSentence:`Esta zona es muy tranquila.`,exampleTranslation:`This area is very quiet.`,type:"noun",gender:"feminine",rank:488},
+  {id:489,spanish:`frontera`,english:`border`,exampleSentence:`Cruzamos la frontera por la mañana.`,exampleTranslation:`We crossed the border in the morning.`,type:"noun",gender:"feminine",rank:489},
+  {id:490,spanish:`siglo`,english:`century`,exampleSentence:`Vivimos en el siglo veintiuno.`,exampleTranslation:`We live in the twenty-first century.`,type:"noun",gender:"masculine",rank:490},
+  {id:491,spanish:`futuro`,english:`future`,exampleSentence:`El futuro está lleno de posibilidades.`,exampleTranslation:`The future is full of possibilities.`,type:"noun",gender:"masculine",rank:491},
+  {id:492,spanish:`pasado`,english:`past`,exampleSentence:`El pasado no se puede cambiar.`,exampleTranslation:`The past cannot be changed.`,type:"noun",gender:"masculine",rank:492},
+  {id:493,spanish:`presente`,english:`present`,exampleSentence:`Vive en el presente y sé feliz.`,exampleTranslation:`Live in the present and be happy.`,type:"noun",gender:"masculine",rank:493},
+  {id:494,spanish:`época`,english:`era/epoch/time`,exampleSentence:`Fue una época muy difícil.`,exampleTranslation:`It was a very difficult era.`,type:"noun",gender:"feminine",rank:494},
+  {id:495,spanish:`período`,english:`period/span`,exampleSentence:`Trabajé allí durante un largo período.`,exampleTranslation:`I worked there for a long period.`,type:"noun",gender:"masculine",rank:495},
+  {id:496,spanish:`nación`,english:`nation`,exampleSentence:`Cada nación tiene su propia cultura.`,exampleTranslation:`Each nation has its own culture.`,type:"noun",gender:"feminine",rank:496},
+  {id:497,spanish:`profesión`,english:`profession`,exampleSentence:`¿Cuál es tu profesión?`,exampleTranslation:`What is your profession?`,type:"noun",gender:"feminine",rank:497},
+  {id:498,spanish:`opinión`,english:`opinion`,exampleSentence:`Respeto tu opinión aunque no estoy de acuerdo.`,exampleTranslation:`I respect your opinion even though I disagree.`,type:"noun",gender:"feminine",rank:498},
+  {id:499,spanish:`solución`,english:`solution`,exampleSentence:`Siempre hay una solución para cada problema.`,exampleTranslation:`There is always a solution for every problem.`,type:"noun",gender:"feminine",rank:499},
+  {id:500,spanish:`situación`,english:`situation`,exampleSentence:`La situación es muy complicada.`,exampleTranslation:`The situation is very complicated.`,type:"noun",gender:"feminine",rank:500},
+];
+
+// ═══════════════════════════ CONSTANTS ═══════════════════════════
+const STORAGE_KEY = 'spanishApp_progress';
+const DAY_MS       = 86400000;
+const MASTER_MS    = 21 * DAY_MS;
+
+// ═══════════════════════════ STATE ═══════════════════════════
+let pData; // persisted progress data
+let sState = {  // session state
+  screen: 'study',
+  queue: [],
+  idx: 0,
+  cardMode: 'recognition', // mode for current card
+  cardState: 'front',      // 'front' | 'revealed'
+  prodChecked: false,
+  prodCorrect: false,
+  stats: { correct: 0, total: 0, newWords: 0, leveledUp: 0 },
+  startTime: 0,
+  speechVoice: null,
+};
+
+// ═══════════════════════════ DEFAULTS ═══════════════════════════
+function defaultProgress() {
+  return {
+    wordProgress: {},
+    globalStats: {
+      totalReviews: 0,
+      dailyStreak: 0,
+      lastStudyDate: '',
+      reviewHistory: [], // [{date,correct,total}]
+      timeSpentToday: 0,
+      lastTimeCheck: Date.now(),
+    },
+    settings: {
+      newCardsPerSession: 10,
+      autoPronounce: true,
+      speechSpeed: 'normal',
+      studyMode: 'recognition',
+      darkMode: true,
+    },
+  };
+}
+
+// ═══════════════════════════ PERSISTENCE ═══════════════════════════
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      pData = JSON.parse(raw);
+      // Fill missing keys
+      const def = defaultProgress();
+      if (!pData.wordProgress) pData.wordProgress = {};
+      if (!pData.globalStats) pData.globalStats = def.globalStats;
+      if (!pData.settings) pData.settings = def.settings;
+      for (const k of Object.keys(def.settings)) {
+        if (pData.settings[k] === undefined) pData.settings[k] = def.settings[k];
+      }
+      if (!pData.globalStats.reviewHistory) pData.globalStats.reviewHistory = [];
+    } else {
+      pData = defaultProgress();
+    }
+  } catch (e) {
+    pData = defaultProgress();
+  }
+}
+
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pData)); } catch (_) {}
+}
+
+// ═══════════════════════════ STREAK / DAILY ═══════════════════════════
+function checkDailyStreak() {
+  const gs = pData.globalStats;
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - DAY_MS).toDateString();
+  if (gs.lastStudyDate === today) return;
+  if (gs.lastStudyDate === yesterday) {
+    // streak continues — will be incremented on first rating today
+  } else if (gs.lastStudyDate !== '') {
+    gs.dailyStreak = 0;
+  }
+}
+
+function markStudiedToday() {
+  const gs = pData.globalStats;
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - DAY_MS).toDateString();
+  if (gs.lastStudyDate !== today) {
+    if (gs.lastStudyDate === yesterday) {
+      gs.dailyStreak++;
+    } else if (gs.lastStudyDate === '') {
+      gs.dailyStreak = 1;
+    } else {
+      gs.dailyStreak = 1;
+    }
+    gs.lastStudyDate = today;
+    // Add to review history (will update counts as we go)
+    const existing = gs.reviewHistory.find(r => r.date === today);
+    if (!existing) gs.reviewHistory.push({ date: today, correct: 0, total: 0, newWords: 0 });
+    if (gs.reviewHistory.length > 60) gs.reviewHistory = gs.reviewHistory.slice(-60);
+  }
+}
+
+// ═══════════════════════════ WORD PROGRESS ═══════════════════════════
+function getWordProgress(id) {
+  if (!pData.wordProgress[id]) {
+    pData.wordProgress[id] = {
+      wordId: id, easeFactor: 2.5, interval: 0, repetitions: 0,
+      nextReview: 0, totalReviews: 0, totalCorrect: 0,
+      lastSeen: 0, status: 'new',
+    };
+  }
+  return pData.wordProgress[id];
+}
+
+function wordStatus(wp) {
+  if (!wp || wp.interval === 0) return 'new';
+  if (wp.interval < DAY_MS) return 'learning';
+  if (wp.interval >= MASTER_MS && wp.easeFactor > 2.0) return 'mastered';
+  return 'review';
+}
+
+// ═══════════════════════════ SM-2 ═══════════════════════════
+function applyRating(wordId, rating) {
+  const card = getWordProgress(wordId);
+  const prevStatus = card.status;
+  if (rating >= 1) {
+    if (card.repetitions === 0)      card.interval = 60000;
+    else if (card.repetitions === 1) card.interval = 600000;
+    else                             card.interval = Math.round(card.interval * card.easeFactor);
+    card.easeFactor = Math.max(1.3, card.easeFactor + 0.1 - (3 - rating) * (0.08 + (3 - rating) * 0.02));
+    card.repetitions++;
+  } else {
+    card.interval = 60000;
+    card.repetitions = 0;
+    card.easeFactor = Math.max(1.3, card.easeFactor - 0.2);
+  }
+  card.nextReview = Date.now() + card.interval;
+  card.totalReviews++;
+  if (rating >= 2) card.totalCorrect++;
+  card.lastSeen = Date.now();
+  card.status = wordStatus(card);
+  const levelOrder = ['new', 'learning', 'review', 'mastered'];
+  if (levelOrder.indexOf(card.status) > levelOrder.indexOf(prevStatus)) sState.stats.leveledUp++;
+  return card;
+}
+
+// ═══════════════════════════ QUEUE ═══════════════════════════
+function buildQueue(extra = 0) {
+  const now = Date.now();
+  const wp = pData.wordProgress;
+  const settings = pData.settings;
+  const dueCards = [];
+  const newCards  = [];
+  for (const vocab of VOCAB_DATA) {
+    const p = wp[vocab.id];
+    if (!p) newCards.push(vocab);
+    else if (p.nextReview <= now) dueCards.push({ vocab, p });
+  }
+  dueCards.sort((a, b) => a.p.nextReview - b.p.nextReview);
+  const limit = settings.newCardsPerSession + extra;
+  const toAdd = newCards.slice(0, limit);
+  sState.queue = [...dueCards.map(d => d.vocab), ...toAdd];
+  sState.idx = 0;
+  sState.stats = { correct: 0, total: 0, newWords: 0, leveledUp: 0 };
+  sState.startTime = Date.now();
+}
+
+// ═══════════════════════════ SPEECH ═══════════════════════════
+function initSpeech() {
+  if (!window.speechSynthesis) return;
+  const loadVoices = () => {
+    const voices = speechSynthesis.getVoices();
+    sState.speechVoice = voices.find(v => v.lang === 'es-ES') ||
+                         voices.find(v => v.lang.startsWith('es-')) || null;
+  };
+  loadVoices();
+  if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function speak(text, rateKey = 'word') {
+  if (!window.speechSynthesis) return;
+  const speed = pData.settings.speechSpeed;
+  const rates = {
+    word:     { slow: 0.6, normal: 0.85, fast: 1.0 },
+    sentence: { slow: 0.55, normal: 0.8, fast: 0.95 },
+  };
+  const rate = rates[rateKey][speed] || 0.85;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'es-ES';
+    u.rate = rate;
+    if (sState.speechVoice) u.voice = sState.speechVoice;
+    speechSynthesis.speak(u);
+  } catch (_) {}
+}
+
+// ═══════════════════════════ SCREEN NAVIGATION ═══════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  sState.screen = name;
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'settings')  renderSettings();
+  if (name === 'study')     renderStudyScreen();
+}
+
+// ═══════════════════════════ STUDY SCREEN ═══════════════════════════
+function renderStudyScreen() {
+  if (sState.queue.length === 0 || sState.idx >= sState.queue.length) {
+    if (sState.stats.total > 0) {
+      showSessionSummary();
+    } else {
+      showCaughtUp();
+    }
+    return;
+  }
+  updateProgressBar();
+  showCard();
+}
+
+function updateProgressBar() {
+  const total = sState.queue.length;
+  const done  = sState.idx;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `Card ${done + 1} of ${total}`;
+  const acc = sState.stats.total > 0
+    ? Math.round((sState.stats.correct / sState.stats.total) * 100) + '%'
+    : '—';
+  document.getElementById('accuracy-text').textContent = `Accuracy: ${acc}`;
+  const streak = pData.globalStats.dailyStreak;
+  document.getElementById('streak-text').textContent = streak > 0 ? `🔥 ${streak}` : '';
+}
+
+function getCurrentCardMode() {
+  const mode = pData.settings.studyMode;
+  if (mode === 'mixed') return Math.random() < 0.5 ? 'recognition' : 'production';
+  return mode;
+}
+
+function showCard() {
+  const vocab = sState.queue[sState.idx];
+  sState.cardState = 'front';
+  sState.prodChecked = false;
+  sState.prodCorrect = false;
+  sState.currentCardMode = getCurrentCardMode();
+  renderCard(vocab);
+  if (pData.settings.autoPronounce && sState.currentCardMode === 'recognition') {
+    setTimeout(() => speak(vocab.spanish, 'word'), 350);
+  }
+}
+
+function renderCard(vocab) {
+  const mode = sState.currentCardMode;
+  const wp = pData.wordProgress[vocab.id];
+  const isNew = !wp;
+  const typeCls = 'type-' + vocab.type;
+  const genderStr = vocab.gender ? ` <span class="gender-tag">(${vocab.gender === 'masculine' ? 'm.' : 'f.'})</span>` : '';
+
+  let frontHtml = '';
+  if (mode === 'recognition') {
+    frontHtml = `
+      <div class="card-header">
+        <span class="rank-badge">#${vocab.rank}${isNew ? ' · NEW' : ''}</span>
+        <span class="type-badge ${typeCls}">${vocab.type}</span>
+      </div>
+      <div class="card-word-row">
+        <span class="card-word">${escHtml(vocab.spanish)}</span>
+        <button class="sound-btn js-speak-word" title="Pronounce">🔊</button>
+      </div>
+      ${genderStr ? `<div style="margin-bottom:12px;font-size:.85rem;color:var(--text-sec)">Gender: ${genderStr}</div>` : ''}
+      <div class="mode-prompt">What does this word mean?</div>
+      <button class="reveal-btn" id="reveal-btn" onclick="revealCard()">Reveal Answer</button>
+      <div class="reveal-hint">Press <kbd style="background:var(--border);padding:2px 6px;border-radius:4px;font-size:.75rem">Space</kbd> to reveal</div>
+    `;
+  } else {
+    // Production
+    frontHtml = `
+      <div class="card-header">
+        <span class="rank-badge">#${vocab.rank}${isNew ? ' · NEW' : ''}</span>
+        <span class="type-badge ${typeCls}">${vocab.type}</span>
+      </div>
+      <div class="prod-english">${escHtml(vocab.english)}</div>
+      <div class="prod-hint">Type the Spanish word:</div>
+      <div class="prod-input-row">
+        <input class="prod-input" id="prod-input" type="text" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false" placeholder="Spanish..."
+          onkeydown="if(event.key==='Enter'){checkProductionAnswer()}"
+          oninput="this.classList.remove('correct','incorrect')">
+        <button class="check-btn" onclick="checkProductionAnswer()">Check</button>
+      </div>
+      <div class="reveal-hint">Press <kbd style="background:var(--border);padding:2px 6px;border-radius:4px;font-size:.75rem">Space</kbd> or Enter to check</div>
+    `;
+  }
+
+  document.getElementById('card-area').innerHTML = `<div class="card" id="study-card">${frontHtml}</div>`;
+
+  // Attach word sound button via JS (avoids inline string injection)
+  const wordSoundBtn = document.querySelector('.js-speak-word');
+  if (wordSoundBtn) wordSoundBtn.addEventListener('click', () => speak(vocab.spanish, 'word'));
+
+  if (mode === 'production') {
+    const inp = document.getElementById('prod-input');
+    if (inp) setTimeout(() => inp.focus(), 100);
+  }
+}
+
+function revealCard() {
+  if (sState.cardState === 'revealed') return;
+  sState.cardState = 'revealed';
+  const vocab = sState.queue[sState.idx];
+  appendAnswerSection(vocab, true, null);
+  if (pData.settings.autoPronounce) {
+    setTimeout(() => speak(vocab.exampleSentence, 'sentence'), 400);
+  }
+}
+
+function checkProductionAnswer() {
+  if (sState.cardState === 'revealed') return;
+  const vocab = sState.queue[sState.idx];
+  const inp = document.getElementById('prod-input');
+  if (!inp) return;
+  const userVal = inp.value.trim();
+  if (!userVal) return;
+  const correct = normalizeStr(userVal) === normalizeStr(vocab.spanish);
+  sState.prodCorrect = correct;
+  sState.prodChecked = true;
+  sState.cardState = 'revealed';
+  inp.classList.add(correct ? 'correct' : 'incorrect');
+  appendAnswerSection(vocab, false, correct);
+  if (pData.settings.autoPronounce) {
+    setTimeout(() => speak(vocab.exampleSentence, 'sentence'), 400);
+  }
+}
+
+function appendAnswerSection(vocab, isRecognition, prodCorrect) {
+  const card = document.getElementById('study-card');
+  if (!card) return;
+  // Remove reveal btn / prod input row if present
+  const revBtn = document.getElementById('reveal-btn');
+  if (revBtn) revBtn.remove();
+
+  let banner = '';
+  let correctNote = '';
+  if (!isRecognition) {
+    if (prodCorrect) {
+      banner = `<div class="result-banner correct-banner">✅ Correct!</div>`;
+    } else {
+      banner = `<div class="result-banner incorrect-banner">❌ Incorrect</div>`;
+      correctNote = `<div class="correct-answer-note">Correct answer:</div><div class="correct-answer-word">${escHtml(vocab.spanish)}</div>`;
+    }
+  }
+
+  const highlighted = highlightWord(vocab.exampleSentence, vocab.spanish);
+
+  const ansHtml = `
+    <div class="answer-section" id="answer-section">
+      ${banner}
+      <div class="answer-english">${isRecognition ? escHtml(vocab.english) : ''}</div>
+      ${correctNote}
+      <div class="example-block">
+        <div class="example-label">Example sentence</div>
+        <div class="example-sentence">${highlighted}</div>
+        <div class="example-translation">${escHtml(vocab.exampleTranslation)}</div>
+        <div class="sentence-sound-row">
+          <button class="sentence-sound-btn js-speak-sentence">🔊 Listen to sentence</button>
+        </div>
+      </div>
+      <div class="rating-section">
+        <div class="rating-label">How well did you know this? &nbsp; <span style="opacity:.5">(Press 1–4)</span></div>
+        <div class="rating-btns">
+          <button class="rating-btn rb-again" onclick="rateCard(0)"><span>Again</span><span class="rb-key">⏮ 1</span></button>
+          <button class="rating-btn rb-hard"  onclick="rateCard(1)"><span>Hard</span><span class="rb-key">😓 2</span></button>
+          <button class="rating-btn rb-good"  onclick="rateCard(2)"><span>Good</span><span class="rb-key">👍 3</span></button>
+          <button class="rating-btn rb-easy"  onclick="rateCard(3)"><span>Easy</span><span class="rb-key">🚀 4</span></button>
+        </div>
+      </div>
+    </div>`;
+
+  card.insertAdjacentHTML('beforeend', ansHtml);
+
+  // Attach sentence sound button via JS (avoids inline string injection)
+  const sentBtn = card.querySelector('.js-speak-sentence');
+  if (sentBtn) sentBtn.addEventListener('click', () => speak(vocab.exampleSentence, 'sentence'));
+}
+
+function rateCard(rating) {
+  const vocab = sState.queue[sState.idx];
+  const wasNew = !pData.wordProgress[vocab.id] || pData.wordProgress[vocab.id].interval === 0;
+  applyRating(vocab.id, rating);
+  sState.stats.total++;
+  if (rating >= 2) sState.stats.correct++;
+  if (wasNew) sState.stats.newWords++;
+  markStudiedToday();
+  pData.globalStats.totalReviews++;
+  // Update today's review history
+  const today = new Date().toDateString();
+  let hist = pData.globalStats.reviewHistory.find(r => r.date === today);
+  if (!hist) { hist = { date: today, correct: 0, total: 0, newWords: 0 }; pData.globalStats.reviewHistory.push(hist); }
+  hist.total++;
+  if (rating >= 2) hist.correct++;
+  if (wasNew) hist.newWords = (hist.newWords || 0) + 1;
+  saveProgress();
+  sState.idx++;
+  updateProgressBar();
+  if (sState.idx >= sState.queue.length) {
+    showSessionSummary();
+  } else {
+    renderStudyScreen();
+  }
+}
+
+// ═══════════════════════════ ALL CAUGHT UP ═══════════════════════════
+function showCaughtUp() {
+  const counts = getStatusCounts();
+  document.getElementById('card-area').innerHTML = `
+    <div class="caught-up-card">
+      <div class="caught-up-icon">🎉</div>
+      <div class="caught-up-title">All caught up!</div>
+      <div class="caught-up-sub">No cards are due right now. Great work!</div>
+      <div class="caught-up-stats">
+        <div class="caught-up-stat">
+          <div class="caught-up-stat-num">${counts.mastered}</div>
+          <div class="caught-up-stat-label">Mastered</div>
+        </div>
+        <div class="caught-up-stat">
+          <div class="caught-up-stat-num">${counts.review}</div>
+          <div class="caught-up-stat-label">In review</div>
+        </div>
+        <div class="caught-up-stat">
+          <div class="caught-up-stat-num">${counts.new}</div>
+          <div class="caught-up-stat-label">Not started</div>
+        </div>
+      </div>
+      ${counts.new > 0 ? `<button class="study-anyway-btn" onclick="studyNewAnyway()">Study New Words Anyway</button>` : '<p style="color:var(--text-sec);font-size:.9rem">Come back later for reviews!</p>'}
+    </div>`;
+  document.getElementById('progress-bar-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = 'All caught up!';
+}
+
+function studyNewAnyway() {
+  buildQueue(20);
+  if (sState.queue.length === 0) return;
+  renderStudyScreen();
+}
+
+// ═══════════════════════════ SESSION SUMMARY ═══════════════════════════
+function showSessionSummary() {
+  const elapsed = Math.round((Date.now() - sState.startTime) / 60000);
+  const acc = sState.stats.total > 0
+    ? Math.round((sState.stats.correct / sState.stats.total) * 100)
+    : 0;
+  document.getElementById('modal-sub-text').textContent =
+    elapsed > 0 ? `Completed in ~${elapsed} min` : 'Session complete!';
+  document.getElementById('modal-stats').innerHTML = `
+    <div class="modal-stat"><div class="modal-stat-num">${sState.stats.total}</div><div class="modal-stat-lbl">Cards reviewed</div></div>
+    <div class="modal-stat"><div class="modal-stat-num">${acc}%</div><div class="modal-stat-lbl">Accuracy</div></div>
+    <div class="modal-stat"><div class="modal-stat-num">${sState.stats.newWords}</div><div class="modal-stat-lbl">New words</div></div>
+    <div class="modal-stat"><div class="modal-stat-num">${sState.stats.leveledUp}</div><div class="modal-stat-lbl">Leveled up</div></div>
+  `;
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+
+function restartSession() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  buildQueue();
+  showScreen('study');
+}
+
+function closeModalAndDash() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  showScreen('dashboard');
+}
+
+// ═══════════════════════════ DASHBOARD ═══════════════════════════
+function getStatusCounts() {
+  const c = { new: 0, learning: 0, review: 0, mastered: 0 };
+  for (const v of VOCAB_DATA) {
+    const s = wordStatus(pData.wordProgress[v.id]);
+    c[s]++;
+  }
+  return c;
+}
+
+function renderDashboard() {
+  const counts = getStatusCounts();
+  const total  = VOCAB_DATA.length;
+  const gs = pData.globalStats;
+
+  const today = new Date().toDateString();
+  const todayHist = gs.reviewHistory.find(r => r.date === today) || { correct: 0, total: 0 };
+  const todayAcc  = todayHist.total > 0 ? Math.round(todayHist.correct / todayHist.total * 100) : 0;
+
+  // Due counts
+  const now = Date.now();
+  const tmr = now + DAY_MS;
+  let dueNow = 0, dueTmr = 0;
+  for (const v of VOCAB_DATA) {
+    const p = pData.wordProgress[v.id];
+    if (!p) continue;
+    if (p.nextReview <= now) dueNow++;
+    else if (p.nextReview <= tmr) dueTmr++;
+  }
+
+  // Last 7 days chart
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * DAY_MS);
+    const ds = d.toDateString();
+    const h = gs.reviewHistory.find(r => r.date === ds);
+    days.push({
+      label: d.toLocaleDateString('en', { weekday: 'short' }),
+      total: h ? h.total : 0,
+      correct: h ? h.correct : 0,
+      pct: h && h.total > 0 ? Math.round(h.correct / h.total * 100) : 0,
+    });
+  }
+  const maxTotal = Math.max(...days.map(d => d.total), 1);
+
+  // Struggled words (lowest easeFactor, seen at least once)
+  const struggled = VOCAB_DATA
+    .filter(v => pData.wordProgress[v.id] && pData.wordProgress[v.id].totalReviews > 0)
+    .map(v => ({ v, ef: pData.wordProgress[v.id].easeFactor }))
+    .sort((a, b) => a.ef - b.ef)
+    .slice(0, 5);
+
+  const chartBars = days.map(d => `
+    <div class="chart-bar-wrap">
+      ${d.total > 0 ? `<span class="chart-pct">${d.pct}%</span>` : ''}
+      <div class="chart-bar ${d.total > 0 ? 'has-data' : ''}" style="height:${Math.round((d.total/maxTotal)*64)+2}px" title="${d.total} cards, ${d.pct}% accuracy"></div>
+      <span class="chart-day">${d.label}</span>
+    </div>`).join('');
+
+  const progressBars = [
+    { label: 'New', count: counts.new, color: 'var(--text-sec)' },
+    { label: 'Learning', count: counts.learning, color: 'var(--yellow)' },
+    { label: 'Review', count: counts.review, color: 'var(--blue)' },
+    { label: 'Mastered', count: counts.mastered, color: 'var(--green)' },
+  ].map(row => `
+    <div class="wpb-row">
+      <div class="wpb-meta">
+        <span>${row.label}</span>
+        <span style="color:${row.color};font-weight:600">${row.count} <span style="color:var(--text-sec);font-weight:400">/ ${total}</span></span>
+      </div>
+      <div class="wpb-bar"><div class="wpb-fill" style="width:${Math.round(row.count/total*100)}%;background:${row.color}"></div></div>
+    </div>`).join('');
+
+  const struggledHtml = struggled.length === 0
+    ? '<div class="empty-msg">No words studied yet.</div>'
+    : struggled.map(({ v, ef }) => `
+      <div class="struggled-item">
+        <div>
+          <div class="struggled-word">${escHtml(v.spanish)}</div>
+          <div class="struggled-en">${escHtml(v.english)}</div>
+        </div>
+        <span class="ease-chip">Ease: ${ef.toFixed(2)}</span>
+      </div>`).join('');
+
+  document.getElementById('dash-content').innerHTML = `
+    <p class="section-title">Word Status</p>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num stat-new">${counts.new}</div><div class="stat-lbl">New</div></div>
+      <div class="stat-card"><div class="stat-num stat-learning">${counts.learning}</div><div class="stat-lbl">Learning</div></div>
+      <div class="stat-card"><div class="stat-num stat-review">${counts.review}</div><div class="stat-lbl">Review</div></div>
+      <div class="stat-card"><div class="stat-num stat-mastered">${counts.mastered}</div><div class="stat-lbl">Mastered</div></div>
+    </div>
+
+    <p class="section-title">Progress</p>
+    <div class="word-progress-bars">${progressBars}</div>
+
+    <p class="section-title">Today</p>
+    <div class="today-grid">
+      <div class="today-card"><div class="today-num">${todayHist.total}</div><div class="today-lbl">Cards reviewed</div></div>
+      <div class="today-card"><div class="today-num">${todayAcc}%</div><div class="today-lbl">Accuracy</div></div>
+      <div class="today-card"><div class="today-num">${todayHist.newWords || 0}</div><div class="today-lbl">New words</div></div>
+    </div>
+
+    <div class="streak-section">
+      <div class="streak-icon">🔥</div>
+      <div><div class="streak-num">${gs.dailyStreak}</div><div class="streak-label">day streak</div></div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:1.1rem;font-weight:600;color:var(--blue)">${gs.totalReviews}</div>
+        <div style="font-size:.75rem;color:var(--text-sec)">total reviews</div>
+      </div>
+    </div>
+
+    <div class="due-row">
+      <div class="due-chip due-now"><span class="due-chip-num">${dueNow}</span>Due now</div>
+      <div class="due-chip due-tmr"><span class="due-chip-num">${dueTmr}</span>Due tomorrow</div>
+    </div>
+
+    <p class="section-title">Last 7 days accuracy</p>
+    <div class="chart-section">
+      <div class="chart-bars">${chartBars}</div>
+    </div>
+
+    <p class="section-title">Recently struggled</p>
+    <div class="struggled-list">${struggledHtml}</div>
+
+    <button class="start-study-btn" onclick="showScreen('study')">📖 Start Studying</button>
+  `;
+}
+
+// ═══════════════════════════ SETTINGS ═══════════════════════════
+function renderSettings() {
+  const s = pData.settings;
+  document.getElementById('setting-new-cards').value = s.newCardsPerSession;
+  document.getElementById('new-cards-val').textContent = s.newCardsPerSession;
+  document.getElementById('setting-auto-pronounce').checked = s.autoPronounce;
+  // Study mode
+  setActiveSegment('seg-mode', s.studyMode === 'recognition' ? 0 : s.studyMode === 'production' ? 1 : 2);
+  // Speed
+  setActiveSegment('seg-speed', s.speechSpeed === 'slow' ? 0 : s.speechSpeed === 'normal' ? 1 : 2);
+}
+
+function setActiveSegment(segId, activeIdx) {
+  const btns = document.getElementById(segId).querySelectorAll('.seg-btn');
+  btns.forEach((b, i) => b.classList.toggle('active', i === activeIdx));
+}
+
+function saveSetting(key, val) {
+  pData.settings[key] = val;
+  saveProgress();
+}
+
+function setStudyMode(mode, btn) {
+  pData.settings.studyMode = mode;
+  saveProgress();
+  const btns = btn.parentElement.querySelectorAll('.seg-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setSpeechSpeed(speed, btn) {
+  pData.settings.speechSpeed = speed;
+  saveProgress();
+  const btns = btn.parentElement.querySelectorAll('.seg-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function exportProgress() {
+  const json = JSON.stringify(pData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'spanishsrs-progress.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importProgress(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      pData = imported;
+      saveProgress();
+      renderSettings();
+      showToast('Progress imported successfully!', 'success');
+    } catch (_) {
+      showToast('Invalid JSON file.', 'error');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function resetProgress() {
+  if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+    pData = defaultProgress();
+    saveProgress();
+    buildQueue();
+    showScreen('study');
+    showToast('Progress reset.', 'success');
+  }
+}
+
+// ═══════════════════════════ HELPERS ═══════════════════════════
+function showToast(msg, type = 'success', duration = 3000) {
+  const tc = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  tc.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('toast-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }, duration);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function normalizeStr(s) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+function highlightWord(sentence, word) {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('(' + escaped + ')', 'gi');
+  // Process original string; HTML-escape each segment individually
+  const out = [];
+  let lastIdx = 0;
+  let m;
+  while ((m = re.exec(sentence)) !== null) {
+    out.push(escHtml(sentence.slice(lastIdx, m.index)));
+    out.push(`<span class="hl">${escHtml(m[1])}</span>`);
+    lastIdx = m.index + m[0].length;
+  }
+  out.push(escHtml(sentence.slice(lastIdx)));
+  return out.join('');
+}
+
+// ═══════════════════════════ KEYBOARD ═══════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const screen = sState.screen;
+  if (screen === 'study') {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (sState.cardState === 'front') {
+        if (sState.currentCardMode === 'production') checkProductionAnswer();
+        else revealCard();
+      }
+    }
+    if (sState.cardState === 'revealed') {
+      if (e.key === '1') rateCard(0);
+      else if (e.key === '2') rateCard(1);
+      else if (e.key === '3') rateCard(2);
+      else if (e.key === '4') rateCard(3);
+    }
+    if (e.key === 'Escape') showScreen('dashboard');
+  }
+});
+
+// ═══════════════════════════ INIT ═══════════════════════════
+function init() {
+  loadProgress();
+  checkDailyStreak();
+  initSpeech();
+  buildQueue();
+  renderStudyScreen();
+}
+
+init();
+</script>
+</body>
+</html>
