@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Spanish Vocabulary Trainer — Learn 500 core Spanish words with English and Dutch translations, spaced repetition, active recall, and text-to-speech." />
+  <meta name="theme-color" content="#0f0f13" />
+  <title>Language SRS — Spanish Vocabulary</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-container">
+    <nav class="app-nav">
+      <div class="app-title">Triolingo</div>
+      <div class="nav-buttons">
+        <button class="nav-btn active" data-view="study" id="nav-study">Study</button>
+        <button class="nav-btn" data-view="progress" id="nav-progress">Progress</button>
+        <button class="nav-btn" data-view="verbs" id="nav-verbs">Verbs</button>
+        <button class="nav-btn" data-view="settings" id="nav-settings">Settings</button>
+      </div>
+    </nav>
+
+    <main id="main-content">
+      <div class="empty-state">
+        <p>Loading...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts: loaded in dependency order -->
+  <script src="vocabulary.js"></script>
+  <script src="conjugations.js"></script>
+  <script src="srs.js"></script>
+  <script src="tts.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Boot the app
+    document.addEventListener('DOMContentLoaded', () => {
+      // Navigation bindings
+      document.getElementById('nav-study').addEventListener('click', () => App.showStudy());
+      document.getElementById('nav-progress').addEventListener('click', () => App.showProgress());
+      document.getElementById('nav-verbs').addEventListener('click', () => App.showVerbs());
+      document.getElementById('nav-settings').addEventListener('click', () => App.showSettings());
+
+      // Initialize
+      App.init();
+    });
+  </script>
+</body>
+</html>
