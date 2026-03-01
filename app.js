@@ -88,12 +88,25 @@ const App = (() => {
       .trim();
   }
 
+  function cleanAnswer(str) {
+    let s = normalizeAccents(str);
+    // Strip parenthetical hints like "(direction)", "(formal)"
+    s = s.replace(/\(.*?\)/g, '').trim();
+    // Strip leading articles: el/la/los/las/un/una (ES), de/het/een (NL), the/a/an (EN), to (EN verb)
+    s = s.replace(/^(el|la|los|las|un|una|de|het|een|the|a|an|to)\s+/i, '').trim();
+    return s;
+  }
+
   function checkAnswer(userInput, correctWord) {
-    const normalizedInput = normalizeAccents(userInput);
-    const alternatives = correctWord.split(/[/,]/).map(s => normalizeAccents(s));
-    return alternatives.some(alt =>
-      normalizedInput === alt || normalizedInput === alt.replace(/^to /, '')
-    );
+    const cleanInput = cleanAnswer(userInput);
+    const rawInput = normalizeAccents(userInput);
+    const alternatives = correctWord.split(/[/,]/).map(s => s.trim());
+    return alternatives.some(alt => {
+      const rawAlt = normalizeAccents(alt);
+      const cleanAlt = cleanAnswer(alt);
+      // Exact match (normalized) or cleaned match (stripped articles/hints)
+      return rawInput === rawAlt || rawInput === cleanAlt || cleanInput === rawAlt || cleanInput === cleanAlt;
+    });
   }
 
   function highlightWord(sentence, word) {
@@ -271,7 +284,7 @@ const App = (() => {
     const progressPercent = queue.length > 0 ? Math.round((currentIndex / queue.length) * 100) : 0;
 
     const sourceWord = sourceLang === 'es' && word.g
-      ? word.es + ' <span class="gender-tag">' + (word.g === 'f' ? 'la' : 'el') + '</span>'
+      ? '<span class="gender-tag">' + (word.g === 'f' ? 'la' : 'el') + '</span> ' + word.es
       : word[sourceLang];
     const sourceFlag = langFlag(sourceLang);
     const targetFlag = langFlag(targetLang);
@@ -373,50 +386,304 @@ const App = (() => {
     });
   }
 
+  // --- Spanish Stress Pattern (Acento) ---
+  function getStressPattern(word) {
+    if (!word) return null;
+    // Clean: take first word, lowercase, remove 'se' suffix for reflexives
+    let w = word.split(/\s/)[0].toLowerCase().replace(/se$/, '');
+    if (w.length < 2) return null;
+
+    // Spanish vowels (with and without accent)
+    const accented = 'áéíóú';
+    const vowels = 'aeiouáéíóú';
+    const isVowel = c => vowels.includes(c);
+    const hasAccent = c => accented.includes(c);
+
+    // Find accentuated vowel — if present, that determines stress
+    let accentPos = -1;
+    for (let i = 0; i < w.length; i++) {
+      if (hasAccent(w[i])) { accentPos = i; break; }
+    }
+
+    // Count syllable nuclei (vowel groups)
+    let syllables = [];
+    let i = 0;
+    while (i < w.length) {
+      if (isVowel(w[i])) {
+        let start = i;
+        while (i < w.length && isVowel(w[i])) i++;
+        syllables.push({ start, end: i - 1 });
+      } else {
+        i++;
+      }
+    }
+    if (syllables.length === 0) return null;
+
+    // Determine stressed syllable index (from end: 0=last, 1=penult, 2=antepenult)
+    let stressFromEnd;
+    if (accentPos >= 0) {
+      // Find which syllable contains the accent
+      for (let s = 0; s < syllables.length; s++) {
+        if (accentPos >= syllables[s].start && accentPos <= syllables[s].end) {
+          stressFromEnd = syllables.length - 1 - s;
+          break;
+        }
+      }
+    } else {
+      // No written accent — apply default rules
+      const lastChar = w[w.length - 1];
+      if (lastChar === 'n' || lastChar === 's' || isVowel(lastChar)) {
+        stressFromEnd = 1; // llana by default
+      } else {
+        stressFromEnd = 0; // aguda by default
+      }
+    }
+
+    if (stressFromEnd === 0) return { type: 'aguda', label: 'Aguda', desc: 'Klemtoon op laatste lettergreep', emoji: '🔴' };
+    if (stressFromEnd === 1) return { type: 'llana', label: 'Llana', desc: 'Klemtoon op voorlaatste lettergreep', emoji: '🟢' };
+    if (stressFromEnd >= 2)  return { type: 'esdrújula', label: 'Esdrújula', desc: 'Klemtoon op 3e van achteren (altijd accent)', emoji: '🔵' };
+    return null;
+  }
+
   // --- Conjugation Panel (Modal Overlay) ---
   function showConjugationPanel(vocabId) {
     if (typeof CONJUGATIONS === 'undefined') return;
     const data = CONJUGATIONS.conjugate(vocabId);
     if (!data) return;
 
+    const word = VOCABULARY.find(w => w.id === vocabId);
     const subjs = CONJUGATIONS.SUBJECTS;
     const refProns = CONJUGATIONS.REFL_PRONOUNS;
 
-    let tableRows = '';
-    for (let i = 0; i < 6; i++) {
-      const form = data.isReflexive ? `${refProns[i]} ${data.forms[i]}` : data.forms[i];
-      tableRows += `
-        <tr>
-          <td class="conj-subject">${subjs[i]}</td>
-          <td class="conj-form">${form}</td>
-        </tr>`;
+    // Helper: build a 6-row tense table
+    function tenseTable(tenseData) {
+      if (!tenseData) return '';
+      let rows = '';
+      for (let i = 0; i < 6; i++) {
+        const form = tenseData.isReflexive ? `${refProns[i]} ${tenseData.forms[i]}` : tenseData.forms[i];
+        rows += `<tr><td class="conj-subject">${subjs[i]}</td><td class="conj-form">${form}</td></tr>`;
+      }
+      return `<table class="conj-table"><tbody>${rows}</tbody></table>`;
     }
 
+    // Helper: build a tense card with title, explanation, table, and level tag
+    function tenseCard(title, explanation, tenseData, extraHtml, level) {
+      if (!tenseData && !extraHtml) return '';
+      const lvlClass = level ? ` level-${level}` : '';
+      return `<div class="tense-card${lvlClass}">
+        ${level ? `<span class="tense-level-tag ${level}">${level.toUpperCase()}</span>` : ''}
+        <div class="tense-card-title">${title}</div>
+        <div class="tense-card-desc">${explanation}</div>
+        ${tenseData ? tenseTable(tenseData) : ''}
+        ${extraHtml || ''}
+      </div>`;
+    }
+
+    // --- Gather all tense data ---
+    const pret = CONJUGATIONS.conjugatePreterite(vocabId);
+    const imperf = CONJUGATIONS.conjugateImperfect(vocabId);
+    const fut = CONJUGATIONS.conjugateFuture(vocabId);
+    const perf = CONJUGATIONS.conjugatePerfect(vocabId);
+    const subj = CONJUGATIONS.conjugateSubjunctive(vocabId);
+    const imper = CONJUGATIONS.conjugateImperative(vocabId);
+    const participio = CONJUGATIONS.getParticipio(vocabId);
+    const gerundio = CONJUGATIONS.getGerundio(vocabId);
+
+    // --- Imperativo custom table ---
+    let imperTable = '';
+    if (imper) {
+      const f = imper.forms;
+      imperTable = `<table class="conj-table"><tbody>
+        <tr><td class="conj-subject">tú (+)</td><td class="conj-form">${f.tu}</td></tr>
+        <tr><td class="conj-subject">usted (+)</td><td class="conj-form">${f.usted || '—'}</td></tr>
+        <tr><td class="conj-subject">vosotros (+)</td><td class="conj-form">${f.vosotros}</td></tr>
+        <tr><td class="conj-subject">ustedes (+)</td><td class="conj-form">${f.ustedes || '—'}</td></tr>
+        <tr class="conj-neg-row"><td class="conj-subject">tú (−)</td><td class="conj-form">no ${f.tuNeg || '—'}</td></tr>
+      </tbody></table>`;
+    }
+
+    // --- Voltooid deelwoord + lopende vorm ---
+    let extraFormsHtml = '';
+    if (participio || gerundio) {
+      const parts = [];
+      if (participio) {
+        parts.push(`<div class="extra-form-item">
+          <span class="extra-form-label">Voltooid deelwoord</span>
+          <span class="extra-form-value${participio.irregular ? ' irregular' : ''}">${participio.form}</span>
+          <span class="extra-form-hint">voor "ik heb …" en als bijv. naamwoord</span>
+        </div>`);
+      }
+      if (gerundio) {
+        parts.push(`<div class="extra-form-item">
+          <span class="extra-form-label">Lopende vorm</span>
+          <span class="extra-form-value${gerundio.irregular ? ' irregular' : ''}">${gerundio.form}</span>
+          <span class="extra-form-hint">voor "ik ben aan het …"</span>
+        </div>`);
+      }
+      extraFormsHtml = `<div class="extra-forms">${parts.join('')}</div>`;
+    }
+
+    // --- Stress pattern ---
+    const stress = getStressPattern(data.infinitive);
+    let stressHtml = '';
+    if (stress) {
+      stressHtml = `<span class="stress-badge stress-${stress.type}" title="${stress.desc}">${stress.emoji} ${stress.label}</span>`;
+    }
+
+    // --- Verb summary ---
+    const summary = CONJUGATIONS.getVerbSummary(vocabId);
+    let summaryHtml = '';
+    if (summary && summary.length > 0) {
+      summaryHtml = `<div class="conj-summary">
+        ${summary.map(s => `<div class="conj-summary-item">• ${s}</div>`).join('')}
+      </div>`;
+    }
+
+    // --- Similar verbs ---
+    const similar = CONJUGATIONS.getSimilarVerbs(vocabId);
+    let similarHtml = '';
+    if (similar.length > 0) {
+      similarHtml = `<div class="conj-similar">
+        <div class="conj-section-title">Vergelijkbare werkwoorden</div>
+        ${similar.map(s => `<div class="conj-similar-item">
+          <span class="similar-verb">${s.infinitive}</span>
+          <span class="similar-meaning">${s.meaning}</span>
+          <span class="similar-reason">${s.reason}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    // --- Related words ---
+    const related = CONJUGATIONS.getRelatedWords(vocabId);
+    let relatedHtml = '';
+    if (related.length > 0) {
+      relatedHtml = `<div class="conj-related">
+        <div class="conj-section-title">Verwante woorden</div>
+        ${related.map(r => `<div class="conj-related-item">
+          <span class="related-es">${r.es}</span>
+          <span class="related-en">${r.en}</span>
+          <span class="related-nl">${r.nl}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    // --- Example sentences ---
+    let exampleHtml = '';
+    if (word && word.ex) {
+      exampleHtml = `<div class="conj-examples">
+        <div class="conj-section-title">Voorbeelden</div>
+        ${word.ex.es ? `<div class="conj-example-row"><span class="lang-flag">${langFlag('es')}</span> ${word.ex.es}</div>` : ''}
+        ${word.ex.nl ? `<div class="conj-example-row"><span class="lang-flag">${langFlag('nl')}</span> ${word.ex.nl}</div>` : ''}
+      </div>`;
+    }
+
+    // --- Check saved level expand state ---
+    const levelExpanded = localStorage.getItem('conjLevelExpanded') === '1';
+
+    // --- Build 3-column layout ---
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay fade-in';
     overlay.innerHTML = `
-      <div class="conj-modal">
+      <div class="conj-modal conj-modal-wide">
         <div class="conj-header">
           <h3>${data.infinitive}</h3>
           <span class="conj-pattern">${data.pattern}</span>
+          ${stressHtml}
+          ${word ? `<span class="conj-meaning">${word.en} / ${word.nl}</span>` : ''}
           <button class="conj-close" id="conj-close">✕</button>
         </div>
-        <table class="conj-table">
-          <thead>
-            <tr><th>Persona</th><th>Presente</th></tr>
-          </thead>
-          <tbody>${tableRows}</tbody>
-        </table>
+
+        ${extraFormsHtml}
+        ${summaryHtml}
+
+        <!-- A1: Presente only -->
+        <div class="conj-level-a1">
+          <div class="conj-col conj-col-present" style="max-width:350px">
+            <div class="conj-col-header present">🟢 Presente <span class="level-tag-inline a1">A1</span></div>
+            ${tenseCard(
+              'Hoe het nu is',
+              'Feiten, gewoontes, wat je nu doet. "Ik spreek Spaans."',
+              data
+            )}
+          </div>
+        </div>
+
+        <!-- Toggle button -->
+        <button class="btn-level-toggle" id="btn-level-toggle">
+          ${levelExpanded ? '▲ Verberg A2/B1' : '▼ Toon meer (A2 / B1)'}
+        </button>
+
+        <!-- A2/B1: Full 3-column layout -->
+        <div class="conj-level-advanced${levelExpanded ? ' expanded' : ''}" id="conj-advanced">
+          <div class="conj-three-col">
+            <!-- VERLEDEN (links, rood) -->
+            <div class="conj-col conj-col-past">
+              <div class="conj-col-header past">⏪ Verleden</div>
+              ${tenseCard(
+                'Onlangs gebeurd',
+                'Eenmalige acties in het verleden. "Ik deed het gisteren."',
+                pret, null, 'a2'
+              )}
+              ${tenseCard(
+                'Gewoontes & beschrijvingen',
+                'Dingen die je vroeger altijd deed, of hoe iets was. "Ik woonde in Madrid."',
+                imperf, null, 'b1'
+              )}
+              ${tenseCard(
+                'Net gedaan / ervaring',
+                'Iets dat je hebt gedaan (en nu relevant is). "Ik heb het gezien."',
+                perf, null, 'a2'
+              )}
+            </div>
+
+            <!-- HEDEN (midden, groen) -->
+            <div class="conj-col conj-col-present">
+              <div class="conj-col-header present">🟢 Heden</div>
+              ${tenseCard(
+                'Opdrachten geven',
+                'Iemand vertellen wat die moet doen. "Zeg het!" / "Doe het niet!"',
+                null, imperTable, 'a2'
+              )}
+              ${tenseCard(
+                'Wensen & twijfel',
+                'Na "ik wil dat…", "hopelijk…", "misschien…". "Ik hoop dat hij komt."',
+                subj, null, 'b1'
+              )}
+            </div>
+
+            <!-- TOEKOMST (rechts, paars) -->
+            <div class="conj-col conj-col-future">
+              <div class="conj-col-header future">🔮 Toekomst</div>
+              ${tenseCard(
+                'Wat er gaat gebeuren',
+                'Plannen, beloftes, voorspellingen. "Ik zal het doen." / "Morgen regent het."',
+                fut, null, 'a2'
+              )}
+            </div>
+          </div>
+        </div>
+
         ${data.tip ? `<div class="conj-tip"><strong>💡 Tip:</strong> ${data.tip}</div>` : ''}
+        ${exampleHtml}
+        ${relatedHtml}
+        ${similarHtml}
       </div>
     `;
     document.body.appendChild(overlay);
+
+    // --- Level toggle logic ---
+    const toggleBtn = document.getElementById('btn-level-toggle');
+    const advSection = document.getElementById('conj-advanced');
+    toggleBtn?.addEventListener('click', () => {
+      const isExpanded = advSection.classList.toggle('expanded');
+      toggleBtn.textContent = isExpanded ? '▲ Verberg A2/B1' : '▼ Toon meer (A2 / B1)';
+      localStorage.setItem('conjLevelExpanded', isExpanded ? '1' : '0');
+    });
 
     document.getElementById('conj-close')?.addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) overlay.remove();
     });
-    // Close on Escape
     const escHandler = (e) => {
       if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); }
     };
@@ -444,16 +711,21 @@ const App = (() => {
       }
     }
 
-    const genderTag = word.g ? ` <span class="gender-tag">${word.g === 'f' ? 'la' : 'el'}</span>` : '';
+    const genderTag = word.g ? `<span class="gender-tag">${word.g === 'f' ? 'la' : 'el'}</span> ` : '';
+
+    // Stress pattern badge for Spanish word
+    const stress = getStressPattern(word.es);
+    const stressBadge = stress ? `<span class="stress-badge stress-${stress.type}" title="${stress.desc}">${stress.emoji} ${stress.label}</span>` : '';
+
     html += '<div class="translations-grid">';
     for (const lang of LANG_KEYS) {
-      if (lang === 'es' && sourceLang === 'es') continue;
       const isSpeakable = lang === 'es' && TTS.isAvailable('es');
-      const wordText = lang === 'es' ? word.es + genderTag : word[lang];
+      const wordText = lang === 'es' ? genderTag + word.es : word[lang];
       html += `
         <div class="translation-row ${lang === targetLang ? 'target-lang' : ''}">
           <span class="lang-flag">${langFlag(lang)}</span>
           <span class="lang-word">${wordText}</span>
+          ${lang === 'es' ? stressBadge : ''}
           ${isSpeakable ? `<button class="speak-btn speak-answer" data-lang="es" data-text="${word.es.replace(/"/g, '&quot;')}" title="Listen">🔊</button>` : ''}
         </div>`;
     }
@@ -661,10 +933,6 @@ const App = (() => {
     updateNav();
 
     const session = SRS.getSession();
-    const accuracy = session.cardsReviewed > 0
-      ? Math.round((session.correctCount / session.cardsReviewed) * 100) : 0;
-    const avgTime = session.cardsReviewed > 0
-      ? Math.round(session.totalResponseTime / session.cardsReviewed / 1000 * 10) / 10 : 0;
     const totalTime = Math.round((Date.now() - session.startTime) / 1000 / 60 * 10) / 10;
 
     const container = document.getElementById('main-content');
@@ -674,23 +942,15 @@ const App = (() => {
         <div class="summary-stats">
           <div class="stat-card">
             <div class="stat-value">${session.cardsReviewed}</div>
-            <div class="stat-label">Cards</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${accuracy}%</div>
-            <div class="stat-label">Accuracy</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${avgTime}s</div>
-            <div class="stat-label">Avg Time</div>
+            <div class="stat-label">Kaarten</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">${session.newWordsIntroduced}</div>
-            <div class="stat-label">New Words</div>
+            <div class="stat-label">Nieuwe woorden</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">${totalTime}m</div>
-            <div class="stat-label">Time Spent</div>
+            <div class="stat-label">Tijd</div>
           </div>
         </div>
         <div class="summary-actions">
@@ -722,8 +982,6 @@ const App = (() => {
     updateNav();
 
     const stats = SRS.getComputedStats(VOCABULARY);
-    const todayAcc = stats.todayAccuracy.total > 0
-      ? Math.round((stats.todayAccuracy.correct / stats.todayAccuracy.total) * 100) : 0;
     const timeToday = Math.round(stats.totalTimeToday / 1000 / 60 * 10) / 10;
 
     // Build daily activity chart from review history
@@ -759,27 +1017,19 @@ const App = (() => {
         <div class="dashboard-grid">
           <div class="stat-card">
             <div class="stat-value">${stats.totalReviewCount}</div>
-            <div class="stat-label">Total Reviews</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${stats.last7Accuracy}%</div>
-            <div class="stat-label">7-Day Accuracy</div>
+            <div class="stat-label">Reviews</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">${stats.estimatedVocab}</div>
-            <div class="stat-label">Est. Vocabulary</div>
+            <div class="stat-label">Woordenschat</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">${stats.dueTomorrow}</div>
-            <div class="stat-label">Due Tomorrow</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${todayAcc}%</div>
-            <div class="stat-label">Today Accuracy</div>
+            <div class="stat-label">Morgen te doen</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">${timeToday}m</div>
-            <div class="stat-label">Time Today</div>
+            <div class="stat-label">Tijd vandaag</div>
           </div>
         </div>
 

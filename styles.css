@@ -4,8 +4,41 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* --- CSS Variables --- */
+/* --- CSS Variables (Default: Light / Purple) --- */
 :root {
+  --bg-primary: #f7f7f8;
+  --bg-secondary: #eeeef2;
+  --bg-card: #ffffff;
+  --bg-hover: #e9e9f0;
+  --text-primary: #1b1b2f;
+  --text-secondary: #4a4a5c;
+  --text-muted: #8888a0;
+  --accent: #7c4dff;
+  --accent-hover: #651fff;
+  --accent-glow: rgba(124, 77, 255, 0.10);
+  --success: #3da34d;
+  --success-bg: rgba(61, 163, 77, 0.10);
+  --warning: #e8a84a;
+  --warning-bg: rgba(232, 168, 74, 0.08);
+  --danger: #e05252;
+  --danger-bg: rgba(224, 82, 82, 0.08);
+  --hard: #c74070;
+  --easy: #3da34d;
+  --highlight: #e8a84a;
+  --border: #dcdce6;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.2s ease;
+
+  /* Status colors */
+  --status-new: #aaa;
+  --status-learning: #e8a84a;
+  --status-review: #7c4dff;
+  --status-mastered: #3da34d;
+}
+
+/* --- Dark Theme --- */
+[data-theme="dark"] {
   --bg-primary: #141418;
   --bg-secondary: #1c1c22;
   --bg-card: #222229;
@@ -13,9 +46,9 @@
   --text-primary: #e4e4e8;
   --text-secondary: #8e8e99;
   --text-muted: #5c5c66;
-  --accent: #7c8cf5;
-  --accent-hover: #6b7be8;
-  --accent-glow: rgba(124, 140, 245, 0.15);
+  --accent: #b388ff;
+  --accent-hover: #9c64ff;
+  --accent-glow: rgba(179, 136, 255, 0.18);
   --success: #5ec269;
   --success-bg: rgba(94, 194, 105, 0.12);
   --warning: #e8a84a;
@@ -26,14 +59,9 @@
   --easy: #5ec269;
   --highlight: #e8c36a;
   --border: #2e2e38;
-  --radius: 10px;
-  --radius-sm: 7px;
-  --transition: 0.2s ease;
-
-  /* Status colors */
   --status-new: #5c5c66;
   --status-learning: #e8a84a;
-  --status-review: #7c8cf5;
+  --status-review: #b388ff;
   --status-mastered: #5ec269;
 }
 
@@ -120,6 +148,14 @@ body {
   background: var(--accent-glow);
 }
 
+.theme-toggle {
+  font-size: 1.1rem;
+  padding: 6px 10px;
+  line-height: 1;
+  margin-left: 4px;
+  border-left: 1px solid var(--border);
+}
+
 /* --- Main Content --- */
 #main-content {
   flex: 1;
@@ -184,13 +220,13 @@ body {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: #58a700;
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
-  box-shadow: 0 4px 20px var(--accent-glow);
+  background: #4c9200;
+  box-shadow: 0 4px 20px rgba(88, 167, 0, 0.2);
 }
 
 .btn-secondary {
@@ -413,8 +449,8 @@ body {
 .sandbox-col.level-mastered .sandbox-count { color: #5ec269; }
 .sandbox-col.level-mastered .sandbox-fill { background: linear-gradient(to top, #3a8a45, #5ec269); }
 
-.sandbox-col.level-good .sandbox-count { color: #7c8cf5; }
-.sandbox-col.level-good .sandbox-fill { background: linear-gradient(to top, #5a68c9, #7c8cf5); }
+.sandbox-col.level-good .sandbox-count { color: #4a9cd4; }
+.sandbox-col.level-good .sandbox-fill { background: linear-gradient(to top, #3578a8, #4a9cd4); }
 
 .sandbox-col.level-okay .sandbox-count { color: #e8a84a; }
 .sandbox-col.level-okay .sandbox-fill { background: linear-gradient(to top, #c08530, #e8a84a); }
@@ -598,8 +634,13 @@ body {
 }
 
 .translation-row.target-lang {
-  background: rgba(108, 92, 231, 0.12);
-  border: 1px solid rgba(108, 92, 231, 0.3);
+  background: rgba(124, 77, 255, 0.07);
+  border: 1px solid rgba(124, 77, 255, 0.18);
+}
+
+[data-theme="dark"] .translation-row.target-lang {
+  background: rgba(179, 136, 255, 0.12);
+  border: 1px solid rgba(179, 136, 255, 0.28);
 }
 
 .lang-flag {
@@ -675,17 +716,11 @@ body {
 
 /* --- Gender Tag --- */
 .gender-tag {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--accent-glow);
-  color: var(--accent-hover);
-  border-radius: 4px;
-  padding: 1px 5px;
-  margin-left: 6px;
-  vertical-align: middle;
+  display: inline;
+  font-size: inherit;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-right: 2px;
 }
 
 /* --- Production Result --- */
@@ -1320,22 +1355,27 @@ body {
 /* --- Conjugation Button (on card) --- */
 .btn-conjugation {
   display: inline-block;
-  background: var(--accent-glow);
-  color: var(--accent);
-  border: 1px solid rgba(124, 140, 245, 0.3);
-  padding: 5px 16px;
+  background: rgba(90, 110, 140, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 7px 20px;
   border-radius: var(--radius-sm);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition);
   font-family: inherit;
   margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+
+.btn-conjugation::before {
+  content: "📖 ";
 }
 
 .btn-conjugation:hover {
-  background: rgba(124, 140, 245, 0.25);
-  border-color: var(--accent);
+  background: rgba(90, 110, 140, 0.15);
+  border-color: var(--text-muted);
 }
 
 .btn-conjugation-answer {
@@ -1378,6 +1418,14 @@ body {
   padding: 3px 10px;
   border-radius: 4px;
   font-weight: 600;
+}
+
+.conj-meaning {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+  flex-basis: 100%;
+  margin-top: 2px;
 }
 
 .conj-close {
@@ -1453,6 +1501,414 @@ body {
 
 .conj-tip strong {
   color: var(--text-primary);
+}
+
+/* --- Enhanced Conjugation Modal (wide 3-column) --- */
+.conj-modal-wide {
+  max-width: 960px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* --- Extra forms (voltooid deelwoord + lopende vorm) --- */
+.extra-forms {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.extra-form-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+}
+
+.extra-form-label {
+  font-weight: 700;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.extra-form-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.extra-form-value.irregular {
+  color: var(--accent);
+}
+
+.extra-form-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* --- 3-Column Tense Grid --- */
+.conj-three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 800px) {
+  .conj-three-col {
+    grid-template-columns: 1fr;
+  }
+  .conj-modal-wide {
+    max-width: 560px;
+  }
+}
+
+.conj-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Column headers */
+.conj-col-header {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.conj-col-header.past {
+  background: rgba(224, 90, 82, 0.10);
+  color: #d05050;
+  border: 1px solid rgba(224, 90, 82, 0.25);
+}
+
+.conj-col-header.present {
+  background: rgba(61, 163, 77, 0.10);
+  color: #3a9a48;
+  border: 1px solid rgba(61, 163, 77, 0.25);
+}
+
+.conj-col-header.future {
+  background: rgba(124, 77, 255, 0.08);
+  color: var(--accent);
+  border: 1px solid rgba(124, 77, 255, 0.22);
+}
+
+[data-theme="dark"] .conj-col-header.past {
+  background: rgba(224, 90, 82, 0.12);
+  color: #ef7070;
+  border-color: rgba(224, 90, 82, 0.3);
+}
+
+[data-theme="dark"] .conj-col-header.present {
+  background: rgba(94, 194, 105, 0.12);
+  color: #6ed67a;
+  border-color: rgba(94, 194, 105, 0.3);
+}
+
+[data-theme="dark"] .conj-col-header.future {
+  background: rgba(179, 136, 255, 0.12);
+  color: #b388ff;
+  border-color: rgba(179, 136, 255, 0.3);
+}
+
+/* --- Tense Card (within a column) --- */
+.tense-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  border: 1px solid var(--border);
+}
+
+.tense-card-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.tense-card-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+/* Color the conjugation forms per column */
+.conj-col-past .conj-form { color: #d05050; }
+.conj-col-present .conj-form { color: #3a9a48; }
+.conj-col-future .conj-form { color: var(--accent); }
+
+[data-theme="dark"] .conj-col-past .conj-form { color: #ef7070; }
+[data-theme="dark"] .conj-col-present .conj-form { color: #6ed67a; }
+[data-theme="dark"] .conj-col-future .conj-form { color: #b388ff; }
+
+/* Imperativo negative row */
+.conj-neg-row td {
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+  color: var(--text-muted);
+}
+
+/* --- Level-aware sections --- */
+.conj-level-a1 {
+  margin-bottom: 12px;
+}
+
+.conj-level-advanced {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+  margin-bottom: 0;
+}
+
+.conj-level-advanced.expanded {
+  max-height: 3000px;
+  opacity: 1;
+  margin-bottom: 16px;
+}
+
+/* Level toggle button */
+.btn-level-toggle {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: var(--bg-primary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.btn-level-toggle:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+/* Tense level tags (A2 / B1 inside cards) */
+.tense-level-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  float: right;
+  margin-top: 2px;
+}
+
+.tense-level-tag.a2 {
+  background: rgba(255, 152, 0, 0.12);
+  color: #e68a00;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.tense-level-tag.b1 {
+  background: rgba(124, 77, 255, 0.10);
+  color: var(--accent);
+  border: 1px solid rgba(124, 77, 255, 0.3);
+}
+
+/* Inline level tag in column header */
+.level-tag-inline {
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.level-tag-inline.a1 {
+  background: rgba(61, 163, 77, 0.15);
+  color: #3a9a48;
+  border: 1px solid rgba(61, 163, 77, 0.3);
+}
+
+[data-theme="dark"] .tense-level-tag.a2 {
+  background: rgba(255, 152, 0, 0.15);
+  color: #ffb74d;
+}
+
+[data-theme="dark"] .tense-level-tag.b1 {
+  background: rgba(179, 136, 255, 0.15);
+  color: #b388ff;
+}
+
+[data-theme="dark"] .level-tag-inline.a1 {
+  background: rgba(94, 194, 105, 0.15);
+  color: #6ed67a;
+}
+
+/* --- Stress pattern badge --- */
+.stress-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.stress-aguda {
+  background: rgba(244, 67, 54, 0.10);
+  color: #e53935;
+  border: 1px solid rgba(244, 67, 54, 0.25);
+}
+
+.stress-llana {
+  background: rgba(76, 175, 80, 0.10);
+  color: #43a047;
+  border: 1px solid rgba(76, 175, 80, 0.25);
+}
+
+.stress-esdrújula {
+  background: rgba(33, 150, 243, 0.10);
+  color: #1e88e5;
+  border: 1px solid rgba(33, 150, 243, 0.25);
+}
+
+[data-theme="dark"] .stress-aguda {
+  background: rgba(244, 67, 54, 0.15);
+  color: #ef9a9a;
+}
+
+[data-theme="dark"] .stress-llana {
+  background: rgba(76, 175, 80, 0.15);
+  color: #a5d6a7;
+}
+
+[data-theme="dark"] .stress-esdrújula {
+  background: rgba(33, 150, 243, 0.15);
+  color: #90caf9;
+}
+
+.conj-summary {
+  background: rgba(124, 77, 255, 0.06);
+  border: 1px solid rgba(124, 77, 255, 0.16);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.conj-summary-item {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.conj-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.conj-examples {
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-top: 12px;
+}
+
+.conj-example-row {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 2px 0;
+}
+
+.conj-example-row .lang-flag {
+  margin-right: 6px;
+}
+
+.conj-related {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(232, 168, 74, 0.08);
+  border: 1px solid rgba(232, 168, 74, 0.2);
+  border-radius: var(--radius-sm);
+}
+
+.conj-related-item {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 3px 0;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+}
+
+.related-es {
+  color: var(--accent);
+  font-weight: 600;
+  min-width: 100px;
+}
+
+.related-en {
+  color: var(--text-secondary);
+}
+
+.related-nl {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.conj-similar {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+}
+
+.conj-similar-item {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 3px 0;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+}
+
+.similar-verb {
+  color: var(--accent);
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.similar-meaning {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.similar-reason {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-style: italic;
 }
 
 /* --- Small Conjugation Table (Verbs page) --- */

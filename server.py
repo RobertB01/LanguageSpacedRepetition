@@ -23,6 +23,13 @@ class SRSHandler(http.server.SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def end_headers(self):
+        # Prevent caching of static files during development
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
+        super().end_headers()
+
     def do_POST(self):
         if self.path == '/api/progress':
             self._save_progress()
@@ -87,7 +94,8 @@ class SRSHandler(http.server.SimpleHTTPRequestHandler):
 
     # Suppress noisy access logs
     def log_message(self, format, *args):
-        if '/api/' in (args[0] if args else ''):
+        first = str(args[0]) if args else ''
+        if '/api/' in first:
             super().log_message(format, *args)
 
 

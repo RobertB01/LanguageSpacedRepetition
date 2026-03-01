@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Spanish Vocabulary Trainer — Learn 500 core Spanish words with English and Dutch translations, spaced repetition, active recall, and text-to-speech." />
-  <meta name="theme-color" content="#0f0f13" />
+  <meta name="theme-color" content="#f7f7f8" />
   <title>Language SRS — Spanish Vocabulary</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -17,6 +17,7 @@
         <button class="nav-btn" data-view="progress" id="nav-progress">Progress</button>
         <button class="nav-btn" data-view="verbs" id="nav-verbs">Verbs</button>
         <button class="nav-btn" data-view="settings" id="nav-settings">Settings</button>
+        <button class="nav-btn theme-toggle" id="btn-theme" title="Toggle theme">🌙</button>
       </div>
     </nav>
 
@@ -28,6 +29,14 @@
   </div>
 
   <!-- Scripts: loaded in dependency order -->
+  <script>
+    // Theme: restore before render (default is light)
+    (function() {
+      const saved = localStorage.getItem('srs_theme') || 'light';
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
+
   <script src="vocabulary.js"></script>
   <script src="conjugations.js"></script>
   <script src="srs.js"></script>
@@ -41,6 +50,25 @@
       document.getElementById('nav-progress').addEventListener('click', () => App.showProgress());
       document.getElementById('nav-verbs').addEventListener('click', () => App.showVerbs());
       document.getElementById('nav-settings').addEventListener('click', () => App.showSettings());
+
+      // Theme toggle
+      const themeBtn = document.getElementById('btn-theme');
+      function updateThemeBtn() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        themeBtn.textContent = isDark ? '🌙' : '☀️';
+      }
+      updateThemeBtn();
+      themeBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('srs_theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('srs_theme', 'dark');
+        }
+        updateThemeBtn();
+      });
 
       // Initialize
       App.init();
