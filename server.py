@@ -101,7 +101,7 @@ class SRSHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    with http.server.HTTPServer(('', PORT), SRSHandler) as server:
+    with http.server.HTTPServer(('127.0.0.1', PORT), SRSHandler) as server:
         print(f'Language SRS server running on http://localhost:{PORT}')
         print(f'Progress file: {PROGRESS_FILE}')
         print('Press Ctrl+C to stop.')

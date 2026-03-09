@@ -1446,6 +1446,59 @@ const App = (() => {
     showProgress,
     showVerbs,
     showSettings,
+    showGames: () => {
+      currentView = 'games';
+      updateNav();
+      const container = document.getElementById('main-content');
+      container.innerHTML = `
+        <div class="games-hub fade-in">
+          <h2 class="games-hub-title">🎮 Games</h2>
+          <p class="games-hub-subtitle">Pick a game to play</p>
+          <div class="games-grid">
+            <button class="game-tile" id="btn-game-describe">
+              <div class="game-tile-icon">🎭</div>
+              <div class="game-tile-name">Describe & Guess</div>
+              <div class="game-tile-desc">Describe a word in your target language — the other player guesses!</div>
+              <div class="game-tile-meta">👥 2 players · cooperative</div>
+            </button>
+            <button class="game-tile" id="btn-game-speed">
+              <div class="game-tile-icon">⚡</div>
+              <div class="game-tile-name">Speed Duel</div>
+              <div class="game-tile-desc">Race to translate — both type at the same time, fastest correct answer wins!</div>
+              <div class="game-tile-meta">👥 2 players · head-to-head</div>
+            </button>
+            <button class="game-tile" id="btn-game-showdown">
+              <div class="game-tile-icon">🎯</div>
+              <div class="game-tile-name">Vocab Showdown</div>
+              <div class="game-tile-desc">Take turns translating words — faster answers score more points!</div>
+              <div class="game-tile-meta">👥 2 players · speed scoring</div>
+            </button>
+            <button class="game-tile" id="btn-game-conjugation">
+              <div class="game-tile-icon">⚔️</div>
+              <div class="game-tile-name">Conjugation Battle</div>
+              <div class="game-tile-desc">Conjugate Spanish verbs under pressure — pick your tenses and fight!</div>
+              <div class="game-tile-meta">👥 2 players · verb mastery</div>
+            </button>
+            <button class="game-tile" id="btn-game-letter">
+              <div class="game-tile-icon">🔤</div>
+              <div class="game-tile-name">Letter Blitz</div>
+              <div class="game-tile-desc">A random letter is drawn — find a word per category starting with that letter!</div>
+              <div class="game-tile-meta">👥 2 players · categories</div>
+            </button>
+          </div>
+        </div>
+      `;
+      function launchGame(gameModule) {
+        currentView = 'games';
+        updateNav();
+        gameModule.show();
+      }
+      document.getElementById('btn-game-describe').addEventListener('click', () => launchGame(DescribeAndGuess));
+      document.getElementById('btn-game-speed').addEventListener('click', () => launchGame(SpeedDuel));
+      document.getElementById('btn-game-showdown').addEventListener('click', () => launchGame(VocabShowdown));
+      document.getElementById('btn-game-conjugation').addEventListener('click', () => launchGame(ConjugationBattle));
+      document.getElementById('btn-game-letter').addEventListener('click', () => launchGame(LetterBlitz));
+    },
     // Legacy alias
     showDashboard: () => showProgress(),
   };

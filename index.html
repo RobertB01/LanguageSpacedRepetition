@@ -17,6 +17,7 @@
         <button class="nav-btn" data-view="progress" id="nav-progress">Progress</button>
         <button class="nav-btn" data-view="verbs" id="nav-verbs">Verbs</button>
         <button class="nav-btn" data-view="settings" id="nav-settings">Settings</button>
+        <button class="nav-btn" data-view="games" id="nav-games">🎮 Games</button>
         <button class="nav-btn theme-toggle" id="btn-theme" title="Toggle theme">🌙</button>
       </div>
     </nav>
@@ -41,6 +42,11 @@
   <script src="conjugations.js"></script>
   <script src="srs.js"></script>
   <script src="tts.js"></script>
+  <script src="games/describe-and-guess.js"></script>
+  <script src="games/speed-duel.js"></script>
+  <script src="games/vocab-showdown.js"></script>
+  <script src="games/conjugation-battle.js"></script>
+  <script src="games/letter-blitz.js"></script>
   <script src="app.js"></script>
   <script>
     // Boot the app
@@ -50,6 +56,7 @@
       document.getElementById('nav-progress').addEventListener('click', () => App.showProgress());
       document.getElementById('nav-verbs').addEventListener('click', () => App.showVerbs());
       document.getElementById('nav-settings').addEventListener('click', () => App.showSettings());
+      document.getElementById('nav-games').addEventListener('click', () => App.showGames());
 
       // Theme toggle
       const themeBtn = document.getElementById('btn-theme');
