@@ -32,6 +32,9 @@ const SRS = (() => {
 
   function _pushToServer() {
     try {
+      // Also persist to active profile
+      if (typeof Profiles !== 'undefined') Profiles.saveCurrentProfile();
+
       const payload = {
         progress: getAllProgress(),
         stats: getGlobalStats(),

@@ -251,20 +251,48 @@
       "averageResponseTime": 4664,
       "lastSeen": 1772397251303,
       "status": "new"
+    },
+    "314_fromEs": {
+      "wordId": "314_fromEs",
+      "easeFactor": 2.3,
+      "interval": 0,
+      "repetitions": 0,
+      "nextReview": 1773056869729,
+      "totalReviews": 1,
+      "totalCorrect": 0,
+      "averageResponseTime": 6735,
+      "lastSeen": 1773056809729,
+      "status": "new"
+    },
+    "192_toEs": {
+      "wordId": "192_toEs",
+      "easeFactor": 2.5500000000000003,
+      "interval": 0,
+      "repetitions": 1,
+      "nextReview": 1773056814296,
+      "totalReviews": 1,
+      "totalCorrect": 1,
+      "averageResponseTime": 4566,
+      "lastSeen": 1773056814296,
+      "status": "new"
     }
   },
   "stats": {
-    "totalReviews": 23,
+    "totalReviews": 25,
     "dailyStreak": 1,
-    "lastStudyDate": "2026-03-01",
+    "lastStudyDate": "2026-03-09",
     "dailyAccuracy": {
       "2026-03-01": {
         "correct": 18,
         "total": 23
+      },
+      "2026-03-09": {
+        "correct": 1,
+        "total": 2
       }
     },
-    "totalTimeToday": 582884,
-    "todayDate": "2026-03-01"
+    "totalTimeToday": 11301,
+    "todayDate": "2026-03-09"
   },
   "settings": {
     "newCardsPerSession": 7,
@@ -433,7 +461,21 @@
       "dir": "toEs",
       "ok": true,
       "rt": 4664
+    },
+    {
+      "ts": 1773056809729,
+      "id": 314,
+      "dir": "fromEs",
+      "ok": false,
+      "rt": 6735
+    },
+    {
+      "ts": 1773056814297,
+      "id": 192,
+      "dir": "toEs",
+      "ok": true,
+      "rt": 4566
     }
   ],
-  "lastSaved": "2026-03-01T20:34:13.306Z"
+  "lastSaved": "2026-03-09T11:46:56.307Z"
 }

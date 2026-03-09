@@ -1359,7 +1359,8 @@ const App = (() => {
       const view = btn.dataset.view;
       // Map dashboard/summary to progress for nav highlighting
       const isActive = view === currentView ||
-        (view === 'progress' && (currentView === 'progress' || currentView === 'summary' || currentView === 'dashboard'));
+        (view === 'progress' && (currentView === 'progress' || currentView === 'summary' || currentView === 'dashboard')) ||
+        (view === 'games' && currentView === 'games');
       btn.classList.toggle('active', isActive);
     });
   }
@@ -1446,58 +1447,127 @@ const App = (() => {
     showProgress,
     showVerbs,
     showSettings,
+    showChat: () => {
+      currentView = 'chat';
+      updateNav();
+      const container = document.getElementById('main-content');
+      container.innerHTML = Chatbot.renderChat();
+      Chatbot.bindChatEvents();
+    },
     showGames: () => {
       currentView = 'games';
       updateNav();
       const container = document.getElementById('main-content');
       container.innerHTML = `
-        <div class="games-hub fade-in">
-          <h2 class="games-hub-title">🎮 Games</h2>
-          <p class="games-hub-subtitle">Pick a game to play</p>
+        <div class="games-menu fade-in">
+          <h2>Games</h2>
           <div class="games-grid">
-            <button class="game-tile" id="btn-game-describe">
-              <div class="game-tile-icon">🎭</div>
-              <div class="game-tile-name">Describe & Guess</div>
-              <div class="game-tile-desc">Describe a word in your target language — the other player guesses!</div>
-              <div class="game-tile-meta">👥 2 players · cooperative</div>
-            </button>
-            <button class="game-tile" id="btn-game-speed">
-              <div class="game-tile-icon">⚡</div>
-              <div class="game-tile-name">Speed Duel</div>
-              <div class="game-tile-desc">Race to translate — both type at the same time, fastest correct answer wins!</div>
-              <div class="game-tile-meta">👥 2 players · head-to-head</div>
-            </button>
-            <button class="game-tile" id="btn-game-showdown">
-              <div class="game-tile-icon">🎯</div>
-              <div class="game-tile-name">Vocab Showdown</div>
-              <div class="game-tile-desc">Take turns translating words — faster answers score more points!</div>
-              <div class="game-tile-meta">👥 2 players · speed scoring</div>
-            </button>
-            <button class="game-tile" id="btn-game-conjugation">
-              <div class="game-tile-icon">⚔️</div>
-              <div class="game-tile-name">Conjugation Battle</div>
-              <div class="game-tile-desc">Conjugate Spanish verbs under pressure — pick your tenses and fight!</div>
-              <div class="game-tile-meta">👥 2 players · verb mastery</div>
-            </button>
-            <button class="game-tile" id="btn-game-letter">
-              <div class="game-tile-icon">🔤</div>
-              <div class="game-tile-name">Letter Blitz</div>
-              <div class="game-tile-desc">A random letter is drawn — find a word per category starting with that letter!</div>
-              <div class="game-tile-meta">👥 2 players · categories</div>
-            </button>
+            <div class="game-card" id="game-guess-who">
+              <div class="game-icon">🎭</div>
+              <h3>¿Quién es?</h3>
+              <p>Guess Who? Ask yes/no questions in Spanish to find the mystery character!</p>
+              <span class="game-tag">1 Player</span>
+            </div>
+            <div class="game-card" id="game-vocab-showdown">
+              <div class="game-icon">⚔️</div>
+              <h3>Vocab Showdown</h3>
+              <p>Two-player translation battle with speed bonuses!</p>
+              <span class="game-tag">2 Players</span>
+            </div>
+            <div class="game-card" id="game-describe-guess">
+              <div class="game-icon">🗣️</div>
+              <h3>Describe & Guess</h3>
+              <p>One player describes, the other guesses. Practice your vocabulary!</p>
+              <span class="game-tag">2 Players</span>
+            </div>
+            <div class="game-card" id="game-conjugation-battle">
+              <div class="game-icon">📝</div>
+              <h3>Conjugation Battle</h3>
+              <p>Race to conjugate verbs correctly!</p>
+              <span class="game-tag">2 Players</span>
+            </div>
+            <div class="game-card" id="game-letter-blitz">
+              <div class="game-icon">🔤</div>
+              <h3>Letter Blitz</h3>
+              <p>Name words starting with random letters. Scattergories-style!</p>
+              <span class="game-tag">2 Players</span>
+            </div>
+            <div class="game-card" id="game-speed-duel">
+              <div class="game-icon">⚡</div>
+              <h3>Speed Duel</h3>
+              <p>Simultaneous race to translate. Who's faster?</p>
+              <span class="game-tag">2 Players</span>
+            </div>
           </div>
         </div>
       `;
-      function launchGame(gameModule) {
-        currentView = 'games';
-        updateNav();
-        gameModule.show();
+
+      document.getElementById('game-guess-who')?.addEventListener('click', () => {
+        GuessWho.startGame();
+      });
+      // Other game launchers (existing games)
+      document.getElementById('game-vocab-showdown')?.addEventListener('click', () => {
+        if (typeof VocabShowdown !== 'undefined') VocabShowdown.start();
+      });
+      document.getElementById('game-describe-guess')?.addEventListener('click', () => {
+        if (typeof DescribeAndGuess !== 'undefined') DescribeAndGuess.start();
+      });
+      document.getElementById('game-conjugation-battle')?.addEventListener('click', () => {
+        if (typeof ConjugationBattle !== 'undefined') ConjugationBattle.start();
+      });
+      document.getElementById('game-letter-blitz')?.addEventListener('click', () => {
+        if (typeof LetterBlitz !== 'undefined') LetterBlitz.start();
+      });
+      document.getElementById('game-speed-duel')?.addEventListener('click', () => {
+        if (typeof SpeedDuel !== 'undefined') SpeedDuel.start();
+      });
+    },
+    showProfileSelect: () => {
+      currentView = 'profile';
+      updateNav();
+      const profiles = Profiles.getProfiles();
+      const activeId = Profiles.getActiveProfileId();
+
+      let html = `<div class="profile-screen fade-in">
+        <h2>Who's learning today?</h2>
+        <div class="profile-grid">`;
+
+      for (const p of profiles) {
+        const stats = Profiles.getProfileStats(p.id);
+        const isActive = p.id === activeId;
+        html += `
+          <div class="profile-card ${isActive ? 'profile-active' : ''}" data-profile="${p.id}" style="--profile-color: ${p.color}">
+            <div class="profile-avatar">${p.avatar}</div>
+            <div class="profile-name">${p.name}</div>
+            <div class="profile-stats">
+              <span>${stats.wordsStudied} words</span>
+              <span>${stats.totalReviews} reviews</span>
+              <span>🔥 ${stats.streak}</span>
+            </div>
+            ${isActive ? '<div class="profile-badge">Active</div>' : ''}
+          </div>`;
       }
-      document.getElementById('btn-game-describe').addEventListener('click', () => launchGame(DescribeAndGuess));
-      document.getElementById('btn-game-speed').addEventListener('click', () => launchGame(SpeedDuel));
-      document.getElementById('btn-game-showdown').addEventListener('click', () => launchGame(VocabShowdown));
-      document.getElementById('btn-game-conjugation').addEventListener('click', () => launchGame(ConjugationBattle));
-      document.getElementById('btn-game-letter').addEventListener('click', () => launchGame(LetterBlitz));
+
+      html += `</div></div>`;
+
+      const container = document.getElementById('main-content');
+      container.innerHTML = html;
+
+      document.querySelectorAll('.profile-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const profileId = card.dataset.profile;
+          Profiles.setActiveProfile(profileId);
+          // Update profile button
+          const profile = Profiles.getActiveProfile();
+          const btn = document.getElementById('btn-profile');
+          if (btn && profile) {
+            btn.textContent = profile.avatar;
+            btn.title = 'Profile: ' + profile.name;
+          }
+          // Re-init app with new profile data
+          init();
+        });
+      });
     },
     // Legacy alias
     showDashboard: () => showProgress(),

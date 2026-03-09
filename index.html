@@ -16,9 +16,11 @@
         <button class="nav-btn active" data-view="study" id="nav-study">Study</button>
         <button class="nav-btn" data-view="progress" id="nav-progress">Progress</button>
         <button class="nav-btn" data-view="verbs" id="nav-verbs">Verbs</button>
+        <button class="nav-btn" data-view="chat" id="nav-chat">Chat</button>
+        <button class="nav-btn" data-view="games" id="nav-games">Games</button>
         <button class="nav-btn" data-view="settings" id="nav-settings">Settings</button>
-        <button class="nav-btn" data-view="games" id="nav-games">🎮 Games</button>
         <button class="nav-btn theme-toggle" id="btn-theme" title="Toggle theme">🌙</button>
+        <button class="nav-btn profile-btn" id="btn-profile" title="Switch profile">👤</button>
       </div>
     </nav>
 
@@ -40,23 +42,28 @@
 
   <script src="vocabulary.js"></script>
   <script src="conjugations.js"></script>
+  <script src="profiles.js"></script>
   <script src="srs.js"></script>
   <script src="tts.js"></script>
-  <script src="games/describe-and-guess.js"></script>
-  <script src="games/speed-duel.js"></script>
-  <script src="games/vocab-showdown.js"></script>
-  <script src="games/conjugation-battle.js"></script>
-  <script src="games/letter-blitz.js"></script>
+  <script src="chatbot.js"></script>
+  <script src="games/guess-who.js"></script>
   <script src="app.js"></script>
   <script>
     // Boot the app
     document.addEventListener('DOMContentLoaded', () => {
+      // Check if profile is selected
+      if (!Profiles.getActiveProfileId()) {
+        App.showProfileSelect();
+      }
+
       // Navigation bindings
       document.getElementById('nav-study').addEventListener('click', () => App.showStudy());
       document.getElementById('nav-progress').addEventListener('click', () => App.showProgress());
       document.getElementById('nav-verbs').addEventListener('click', () => App.showVerbs());
-      document.getElementById('nav-settings').addEventListener('click', () => App.showSettings());
+      document.getElementById('nav-chat').addEventListener('click', () => App.showChat());
       document.getElementById('nav-games').addEventListener('click', () => App.showGames());
+      document.getElementById('nav-settings').addEventListener('click', () => App.showSettings());
+      document.getElementById('btn-profile').addEventListener('click', () => App.showProfileSelect());
 
       // Theme toggle
       const themeBtn = document.getElementById('btn-theme');
@@ -77,8 +84,24 @@
         updateThemeBtn();
       });
 
-      // Initialize
-      App.init();
+      // Update profile button display
+      function updateProfileBtn() {
+        const profile = Profiles.getActiveProfile();
+        const btn = document.getElementById('btn-profile');
+        if (profile) {
+          btn.textContent = profile.avatar;
+          btn.title = `Profile: ${profile.name}`;
+        }
+      }
+      updateProfileBtn();
+
+      // Enable auto-save for profiles
+      Profiles.enableAutoSave();
+
+      // Initialize (only if profile selected)
+      if (Profiles.getActiveProfileId()) {
+        App.init();
+      }
     });
   </script>
 </body>
