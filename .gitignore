@@ -1,0 +1,10 @@
+# Local progress data — should never be committed
+progress.json
+
+# Supabase credentials — copy supabase-config.example.js to supabase-config.js
+# and fill in your project URL + anon key. Never commit the real one.
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/

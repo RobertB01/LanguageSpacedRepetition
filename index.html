@@ -43,6 +43,11 @@
   <script src="vocabulary.js"></script>
   <script src="conjugations.js"></script>
   <script src="profiles.js"></script>
+  <!-- Supabase SDK + cloud sync (config file is git-ignored; copy supabase-config.example.js
+       to supabase-config.js and fill in your keys. If absent, app runs localStorage-only.) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase-config.js" onerror="console.info('No supabase-config.js — running in localStorage-only mode.')"></script>
+  <script src="cloud.js"></script>
   <script src="srs.js"></script>
   <script src="tts.js"></script>
   <script src="chatbot.js"></script>
@@ -51,6 +56,9 @@
   <script>
     // Boot the app
     document.addEventListener('DOMContentLoaded', () => {
+      // Initialize cloud sync (no-op if supabase-config.js missing).
+      if (typeof Cloud !== 'undefined') Cloud.init();
+
       // Check if profile is selected
       if (!Profiles.getActiveProfileId()) {
         App.showProfileSelect();

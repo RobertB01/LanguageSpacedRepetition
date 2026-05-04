@@ -12,6 +12,12 @@ const SRS = (() => {
 
   const API_URL = '/api/progress';
 
+  // Only sync with the local server.py when actually running on localhost.
+  // On GitHub Pages, /api/progress would resolve to a static file (e.g. a
+  // committed progress.json) and silently overwrite the user's real progress.
+  const IS_LOCAL = typeof location !== 'undefined' &&
+    (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+
   // Default settings
   const DEFAULT_SETTINGS = {
     newCardsPerSession: 10,
@@ -20,7 +26,7 @@ const SRS = (() => {
     studyMode: 'mixed',
   };
 
-  // --- Server Sync ---
+  // --- Sync (Cloud + optional local server) ---
   let _syncTimer = null;
   function scheduleSyncToServer() {
     if (_syncTimer) clearTimeout(_syncTimer);
@@ -30,59 +36,91 @@ const SRS = (() => {
     }, 2000);
   }
 
+  function _buildPayload() {
+    return {
+      progress: getAllProgress(),
+      stats: getGlobalStats(),
+      settings: getSettings(),
+      history: getReviewHistory(),
+      lastSaved: new Date().toISOString(),
+    };
+  }
+
   function _pushToServer() {
     try {
       // Also persist to active profile
       if (typeof Profiles !== 'undefined') Profiles.saveCurrentProfile();
 
-      const payload = {
-        progress: getAllProgress(),
-        stats: getGlobalStats(),
-        settings: getSettings(),
-        history: getReviewHistory(),
-        lastSaved: new Date().toISOString(),
-      };
-      fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }).catch(err => console.warn('Server sync failed (save):', err));
+      const payload = _buildPayload();
+
+      // Cloud sync (Supabase) — works on GitHub Pages and localhost.
+      if (typeof Cloud !== 'undefined' && Cloud.isEnabled()) {
+        const profileId = (typeof Profiles !== 'undefined')
+          ? Profiles.getActiveProfileId()
+          : null;
+        if (profileId) {
+          Cloud.save(profileId, payload);
+        }
+      }
+
+      // Local dev server — only when actually running on localhost.
+      if (IS_LOCAL) {
+        fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).catch(err => console.warn('Local server sync failed (save):', err));
+      }
     } catch (e) {
-      console.warn('Server sync error:', e);
+      console.warn('Sync error:', e);
     }
   }
 
-  // Load from server and merge into localStorage (server wins on conflict)
+  // Apply a payload (from cloud or local server) into localStorage.
+  function _applyPayload(data) {
+    if (!data) return false;
+    if (!data.progress && !data.stats && !data.settings && !data.history) {
+      return false;
+    }
+    if (data.progress) saveAllProgress(data.progress, true);
+    if (data.stats) saveGlobalStats(data.stats, true);
+    if (data.settings) saveSettings({ ...DEFAULT_SETTINGS, ...data.settings }, true);
+    if (data.history) saveReviewHistory(data.history, true);
+    return true;
+  }
+
+  // Load latest data into localStorage. Cloud takes priority when configured;
+  // otherwise falls back to the local server.py (only on localhost).
   async function loadFromServer() {
     try {
-      const resp = await fetch(API_URL);
-      if (!resp.ok) return false;
-      const data = await resp.json();
-      if (!data || (!data.progress && !data.stats)) {
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(STATS_KEY);
-        localStorage.removeItem(SETTINGS_KEY);
-        localStorage.removeItem(HISTORY_KEY);
-        return true;
+      // 1. Cloud first (works on Pages).
+      if (typeof Cloud !== 'undefined' && Cloud.isEnabled()) {
+        const profileId = (typeof Profiles !== 'undefined')
+          ? Profiles.getActiveProfileId()
+          : null;
+        if (profileId) {
+          const result = await Cloud.load(profileId);
+          if (result && result.payload) {
+            _applyPayload(result.payload);
+            migrateToBidirectional();
+            return true;
+          }
+        }
       }
-      if (data.progress) {
-        saveAllProgress(data.progress, true);
+
+      // 2. Local dev server (only on localhost — never on Pages).
+      if (IS_LOCAL) {
+        const resp = await fetch(API_URL);
+        if (resp.ok) {
+          const data = await resp.json();
+          _applyPayload(data);
+        }
       }
-      if (data.stats) {
-        saveGlobalStats(data.stats, true);
-      }
-      if (data.settings) {
-        saveSettings({ ...DEFAULT_SETTINGS, ...data.settings }, true);
-      }
-      if (data.history) {
-        saveReviewHistory(data.history, true);
-      }
-      // After loading, migrate to bidirectional if needed
+
       migrateToBidirectional();
       return true;
     } catch (e) {
-      console.warn('Could not load from server, using localStorage:', e);
-      // Still migrate local data
+      console.warn('Could not sync from cloud/server, using localStorage:', e);
       migrateToBidirectional();
       return false;
     }
