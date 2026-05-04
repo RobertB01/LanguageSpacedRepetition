@@ -66,7 +66,17 @@ const SRS = (() => {
     _syncTimer = setTimeout(() => {
       _syncTimer = null;
       _pushToServer();
-    }, 2000);
+    }, 800);
+  }
+
+  // Force any pending save to fire NOW (used on tab close / page hide so we
+  // don't lose the last review or two when the debounce timer hasn't elapsed).
+  function flushSync() {
+    if (_syncTimer) {
+      clearTimeout(_syncTimer);
+      _syncTimer = null;
+    }
+    _pushToServer();
   }
 
   function _buildPayload() {
@@ -771,6 +781,7 @@ const SRS = (() => {
     importProgress,
     resetProgress,
     loadFromServer,
+    flushSync,
     getReviewHistory,
     DEFAULT_SETTINGS,
     SCHEMA_VERSION,

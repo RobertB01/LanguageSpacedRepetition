@@ -255,6 +255,16 @@ const App = (() => {
 
     setupKeyboard();
 
+    // Flush any pending sync immediately when the tab is hidden or closed.
+    // Without this, reviews done in the last second (during the debounce
+    // window) get dropped if the user navigates away or closes the tab.
+    const flush = () => { try { SRS.flushSync(); } catch (e) {} };
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', flush);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flush();
+    });
+
     if (TTS.hasWarning()) {
       const missing = TTS.getWarnings().map(l => langName(l)).join(', ');
       showWarning(`No TTS voice found for: ${missing}. Try Chrome or Edge for best support.`);
