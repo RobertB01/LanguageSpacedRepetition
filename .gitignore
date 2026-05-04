@@ -4,6 +4,10 @@ progress.json
 # Supabase credentials — copy supabase-config.example.js to supabase-config.js
 # and fill in your project URL + anon key. Never commit the real one.
 
+# OpenAI key — copy openai-config.example.js to openai-config.js and fill in.
+# Never commit the real key.
+openai-config.js
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db

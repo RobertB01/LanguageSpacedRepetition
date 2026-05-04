@@ -9,14 +9,47 @@ const SRS = (() => {
   const SETTINGS_KEY = 'srs_settings';
   const HISTORY_KEY = 'srs_review_history';
   const MIGRATION_KEY = 'srs_bidirectional_migrated';
+  const SCHEMA_VERSION_KEY = 'srs_schema_version';
+
+  // ----- Schema versioning ---------------------------------------------------
+  // Bump this whenever you change the SHAPE of stored data in a way that
+  // existing saves can't handle by simple defaulting (`?? fallback`).
+  // For pure additions of new fields, you DO NOT need to bump this — just read
+  // with `?? default` everywhere.
+  const SCHEMA_VERSION = 1;
+
+  // Append-only map of upgrade functions. To go from v(N-1) to vN, write
+  // `migrations[N] = (data) => { ...mutate or rebuild... return data; }`.
+  // Each migration must be pure & idempotent (safe if run twice).
+  const migrations = {
+    // 1: (data) => { ...example: rename a field... return data; },
+  };
+
+  function migratePayload(payload) {
+    if (!payload || typeof payload !== 'object') return payload;
+    let v = payload._schemaVersion ?? 0;
+    while (v < SCHEMA_VERSION) {
+      v++;
+      const fn = migrations[v];
+      if (typeof fn === 'function') {
+        try { payload = fn(payload) || payload; }
+        catch (e) { console.warn('Migration', v, 'failed:', e); break; }
+      }
+    }
+    payload._schemaVersion = SCHEMA_VERSION;
+    return payload;
+  }
 
   const API_URL = '/api/progress';
 
   // Only sync with the local server.py when actually running on localhost.
   // On GitHub Pages, /api/progress would resolve to a static file (e.g. a
   // committed progress.json) and silently overwrite the user's real progress.
-  const IS_LOCAL = typeof location !== 'undefined' &&
-    (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+  const IS_LOCAL = typeof location !== 'undefined' && (
+    location.hostname === 'localhost' ||
+    location.hostname === '127.0.0.1' ||
+    location.protocol === 'file:'
+  );
 
   // Default settings
   const DEFAULT_SETTINGS = {
@@ -38,6 +71,7 @@ const SRS = (() => {
 
   function _buildPayload() {
     return {
+      _schemaVersion: SCHEMA_VERSION,
       progress: getAllProgress(),
       stats: getGlobalStats(),
       settings: getSettings(),
@@ -54,12 +88,15 @@ const SRS = (() => {
       const payload = _buildPayload();
 
       // Cloud sync (Supabase) — works on GitHub Pages and localhost.
+      // Reads always come from cloud. Writes are gated by the user's toggle:
+      // ON by default in production, OFF on localhost so dev experiments
+      // can't overwrite real progress.
       if (typeof Cloud !== 'undefined' && Cloud.isEnabled()) {
-        const profileId = (typeof Profiles !== 'undefined')
-          ? Profiles.getActiveProfileId()
-          : null;
-        if (profileId) {
-          Cloud.save(profileId, payload);
+        if (typeof Profiles !== 'undefined' && Profiles.isCloudSaveEnabled()) {
+          const profileId = Profiles.getCloudProfileId();
+          if (profileId) {
+            Cloud.save(profileId, payload);
+          }
         }
       }
 
@@ -79,6 +116,7 @@ const SRS = (() => {
   // Apply a payload (from cloud or local server) into localStorage.
   function _applyPayload(data) {
     if (!data) return false;
+    data = migratePayload(data);
     if (!data.progress && !data.stats && !data.settings && !data.history) {
       return false;
     }
@@ -86,6 +124,7 @@ const SRS = (() => {
     if (data.stats) saveGlobalStats(data.stats, true);
     if (data.settings) saveSettings({ ...DEFAULT_SETTINGS, ...data.settings }, true);
     if (data.history) saveReviewHistory(data.history, true);
+    try { localStorage.setItem(SCHEMA_VERSION_KEY, String(SCHEMA_VERSION)); } catch (e) {}
     return true;
   }
 
@@ -96,7 +135,7 @@ const SRS = (() => {
       // 1. Cloud first (works on Pages).
       if (typeof Cloud !== 'undefined' && Cloud.isEnabled()) {
         const profileId = (typeof Profiles !== 'undefined')
-          ? Profiles.getActiveProfileId()
+          ? Profiles.getCloudProfileId()
           : null;
         if (profileId) {
           const result = await Cloud.load(profileId);
@@ -646,6 +685,75 @@ const SRS = (() => {
     scheduleSyncToServer();
   }
 
+  // ----- Vocabulary classification helpers ----------------------------------
+  // These power the chatbot and the Reading page: they answer "which words
+  // does this user comfortably know vs struggle with vs hasn't seen."
+  // Read defensively so adding new fields to entries can never break them.
+
+  function _bestProgressFor(wordId, allProgress) {
+    const a = allProgress[`${wordId}_toEs`];
+    const b = allProgress[`${wordId}_fromEs`];
+    if (!a && !b) return null;
+    // "Best" = highest interval (most learned) of the two directions.
+    const ai = a?.interval ?? 0;
+    const bi = b?.interval ?? 0;
+    return ai >= bi ? a : b;
+  }
+
+  // Words the user comfortably knows. By default: interval >= 7 days in at
+  // least one direction (covers 'review' and 'mastered' status).
+  function getKnownWords(vocabulary, opts = {}) {
+    const minInterval = opts.minInterval ?? 7;
+    const all = getAllProgress();
+    return vocabulary.filter(w => {
+      const p = _bestProgressFor(w.id, all);
+      return p && (p.interval ?? 0) >= minInterval;
+    });
+  }
+
+  // Words the user has seen at least a couple times but is failing on.
+  function getStrugglingWords(vocabulary, opts = {}) {
+    const maxEase = opts.maxEase ?? 2.0;
+    const minReviews = opts.minReviews ?? 2;
+    const all = getAllProgress();
+    const out = [];
+    for (const w of vocabulary) {
+      for (const dir of ['toEs', 'fromEs']) {
+        const p = all[`${w.id}_${dir}`];
+        if (!p) continue;
+        if ((p.totalReviews ?? 0) >= minReviews && (p.easeFactor ?? 2.5) < maxEase) {
+          out.push({ word: w, direction: dir, progress: p });
+          break;
+        }
+      }
+    }
+    return out;
+  }
+
+  // Words that have NEVER been reviewed (in either direction).
+  function getUnknownWords(vocabulary) {
+    const all = getAllProgress();
+    return vocabulary.filter(w =>
+      !all[`${w.id}_toEs`] && !all[`${w.id}_fromEs`]
+    );
+  }
+
+  // Pick a "frontier" set: mostly known + a few unknown ones, for generated
+  // reading texts and AI responses calibrated to the user's level.
+  // Returns: { known: Word[], unknown: Word[] }
+  function getFrontierWords(vocabulary, opts = {}) {
+    const known = getKnownWords(vocabulary, opts);
+    const unknown = getUnknownWords(vocabulary);
+    const knownTarget = opts.known ?? 30;
+    const unknownTarget = opts.unknown ?? Math.max(2, Math.round(knownTarget * 0.1));
+    // Shuffle deterministically-ish
+    const shuffle = arr => arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+    return {
+      known: shuffle(known).slice(0, knownTarget),
+      unknown: shuffle(unknown).slice(0, unknownTarget),
+    };
+  }
+
   return {
     getSettings,
     saveSettings,
@@ -665,5 +773,10 @@ const SRS = (() => {
     loadFromServer,
     getReviewHistory,
     DEFAULT_SETTINGS,
+    SCHEMA_VERSION,
+    getKnownWords,
+    getStrugglingWords,
+    getUnknownWords,
+    getFrontierWords,
   };
 })();

@@ -36,6 +36,37 @@ const Profiles = (() => {
     return localStorage.getItem(ACTIVE_PROFILE_KEY) || null;
   }
 
+  // ----- Cloud save toggle --------------------------------------------------
+  // Reads always come from the cloud (when configured). This toggle controls
+  // whether writes are PUSHED to the cloud.
+  //   Production (Pages): default ON  → reviews sync to Supabase normally.
+  //   Local dev:          default OFF → you can study/develop without ever
+  //                       overwriting your real cloud progress. Local
+  //                       changes only live in this browser's localStorage.
+  // Users override the default with the dev banner toggle.
+  const CLOUD_SAVE_KEY = 'srs_cloud_save';
+  const IS_LOCAL = typeof location !== 'undefined' && (
+    location.hostname === 'localhost' ||
+    location.hostname === '127.0.0.1' ||
+    location.protocol === 'file:'
+  );
+
+  function isCloudSaveEnabled() {
+    const stored = localStorage.getItem(CLOUD_SAVE_KEY);
+    if (stored === '1') return true;
+    if (stored === '0') return false;
+    return !IS_LOCAL; // default: ON in production, OFF locally
+  }
+
+  function setCloudSaveEnabled(on) {
+    localStorage.setItem(CLOUD_SAVE_KEY, on ? '1' : '0');
+  }
+
+  // The id used when talking to the cloud — always the real profile id now.
+  function getCloudProfileId() {
+    return getActiveProfileId();
+  }
+
   function getActiveProfile() {
     const id = getActiveProfileId();
     if (!id) return null;
@@ -122,5 +153,9 @@ const Profiles = (() => {
     enableAutoSave,
     saveCurrentProfile,
     getProfileStats,
+    isCloudSaveEnabled,
+    setCloudSaveEnabled,
+    getCloudProfileId,
+    IS_LOCAL,
   };
 })();

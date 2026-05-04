@@ -16,6 +16,8 @@
         <button class="nav-btn active" data-view="study" id="nav-study">Study</button>
         <button class="nav-btn" data-view="progress" id="nav-progress">Progress</button>
         <button class="nav-btn" data-view="verbs" id="nav-verbs">Verbs</button>
+        <button class="nav-btn" data-view="read" id="nav-read">Read</button>
+        <button class="nav-btn" data-view="reference" id="nav-reference">Reference</button>
         <button class="nav-btn" data-view="chat" id="nav-chat">Chat</button>
         <button class="nav-btn" data-view="games" id="nav-games">Games</button>
         <button class="nav-btn" data-view="settings" id="nav-settings">Settings</button>
@@ -48,9 +50,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="supabase-config.js" onerror="console.info('No supabase-config.js — running in localStorage-only mode.')"></script>
   <script src="cloud.js"></script>
+  <!-- OpenAI (config file is git-ignored; copy openai-config.example.js
+       to openai-config.js and fill in your key. If absent, AI features are disabled.) -->
+  <script src="openai-config.js" onerror="console.info('No openai-config.js — AI features disabled.')"></script>
+  <script src="ai.js"></script>
   <script src="srs.js"></script>
   <script src="tts.js"></script>
   <script src="chatbot.js"></script>
+  <script src="reading.js"></script>
+  <script src="reference.js"></script>
   <script src="games/guess-who.js"></script>
   <script src="app.js"></script>
   <script>
@@ -58,6 +66,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Initialize cloud sync (no-op if supabase-config.js missing).
       if (typeof Cloud !== 'undefined') Cloud.init();
+      if (typeof AI !== 'undefined') AI.init();
+
+      // Dev-mode banner (only when running on localhost). Lets you toggle
+      // between sandbox and production cloud rows, and copy prod → sandbox.
+      if (Profiles.IS_LOCAL) renderDevBanner();
 
       // Check if profile is selected
       if (!Profiles.getActiveProfileId()) {
@@ -68,6 +81,8 @@
       document.getElementById('nav-study').addEventListener('click', () => App.showStudy());
       document.getElementById('nav-progress').addEventListener('click', () => App.showProgress());
       document.getElementById('nav-verbs').addEventListener('click', () => App.showVerbs());
+      document.getElementById('nav-read').addEventListener('click', () => App.showReading());
+      document.getElementById('nav-reference').addEventListener('click', () => App.showReference());
       document.getElementById('nav-chat').addEventListener('click', () => App.showChat());
       document.getElementById('nav-games').addEventListener('click', () => App.showGames());
       document.getElementById('nav-settings').addEventListener('click', () => App.showSettings());
@@ -111,6 +126,48 @@
         App.init();
       }
     });
+
+    // Dev banner: shown only on localhost. Lets you safely choose whether
+    // your local studying writes back to the cloud or stays local-only.
+    function renderDevBanner() {
+      const bar = document.createElement('div');
+      bar.id = 'dev-banner';
+      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;padding:8px 14px;font-size:13px;font-family:system-ui,sans-serif;z-index:9999;display:flex;gap:14px;align-items:center;box-shadow:0 -2px 6px rgba(0,0,0,.25);';
+      function refresh() {
+        const saving = Profiles.isCloudSaveEnabled();
+        const id = Profiles.getActiveProfileId() || '(no profile)';
+        bar.style.background = saving ? '#ff7a7a' : '#7ecf7e';
+        bar.style.color = '#111';
+        bar.innerHTML = `
+          <strong style="font-size:14px;">🧪 LOCAL DEV</strong>
+          <span>profile: <b>${id}</b></span>
+          <span style="padding:2px 8px;border-radius:4px;background:rgba(0,0,0,.15);font-weight:600;">
+            ${saving ? '⚠️ WRITES GO TO CLOUD' : '🔒 LOCAL ONLY (cloud is read-only)'}
+          </span>
+          <label style="margin-left:auto;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="dev-save-toggle" ${saving ? 'checked' : ''}/>
+            Save to cloud
+          </label>
+          <button id="dev-reload" style="cursor:pointer;padding:4px 10px;border-radius:4px;border:1px solid rgba(0,0,0,.3);background:rgba(255,255,255,.7);">↻ Reload from cloud</button>
+        `;
+        bar.querySelector('#dev-save-toggle').addEventListener('change', (e) => {
+          if (e.target.checked && !confirm('Turn cloud writes ON? Anything you do here will overwrite your real cloud progress.')) {
+            e.target.checked = false;
+            return;
+          }
+          Profiles.setCloudSaveEnabled(e.target.checked);
+          refresh();
+        });
+        bar.querySelector('#dev-reload').addEventListener('click', async () => {
+          await SRS.loadFromServer();
+          location.reload();
+        });
+      }
+      document.body.appendChild(bar);
+      // Add bottom padding so banner doesn't cover content.
+      document.body.style.paddingBottom = '52px';
+      refresh();
+    }
   </script>
 </body>
 </html>

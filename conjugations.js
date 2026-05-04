@@ -337,7 +337,18 @@ const CONJUGATIONS = (() => {
     const word = VOCABULARY.find(w => w.id === vocabId);
     if (!word) return null;
     if (word.type !== 'verb') return null;
-    let inf = word.es.split('/')[0].trim();
+    // Take the first slash-separated alternative, strip parentheticals
+    // ("perder (un partido)" → "perder"), strip trailing prepositions
+    // ("depender de" → "depender", "asistir a" → "asistir"), then trim.
+    let inf = word.es.split('/')[0]
+      .replace(/\([^)]*\)/g, '')
+      .trim();
+    inf = inf.replace(/\s+(de|a|en|con|por|para)$/i, '').trim();
+    // Multi-word phrases like "darse cuenta" — keep only the first token,
+    // which is the verbal head.
+    if (inf.includes(' ')) inf = inf.split(/\s+/)[0];
+    // Sanity check: must end in -ar/-er/-ir (optionally + se).
+    if (!/(ar|er|ir|árse|érse|írse|arse|erse|irse)$/i.test(inf)) return null;
     return inf;
   }
 
@@ -694,7 +705,11 @@ const CONJUGATIONS = (() => {
     const dbIds = new Set(Object.keys(DB).map(Number));
     const allIds = new Set(dbIds);
     for (const w of VOCABULARY) {
-      if (w.type === 'verb') allIds.add(w.id);
+      if (w.type !== 'verb') continue;
+      // Only include entries that parse to a valid infinitive — keeps
+      // mistagged or non-infinitive entries (e.g. "es / está") off the
+      // Verbs page even if their `type` field still says "verb".
+      if (dbIds.has(w.id) || getInfinitive(w.id)) allIds.add(w.id);
     }
     return [...allIds].sort((a, b) => a - b);
   }

@@ -529,6 +529,34 @@ const Chatbot = (() => {
     `;
   }
 
+  // ----- AI-backed reply (uses learner context for guided responses) ---------
+  async function _aiReply(userText, prevHistory) {
+    const lang = getChatLang();
+    const langName = lang === 'es' ? 'Spanish' : 'Dutch';
+    const learnerCtx = AI.buildLearnerContext({ limit: 50 });
+
+    const system = `You are a friendly, encouraging ${langName} tutor inside a spaced-repetition app. ` +
+      `Your goal is to help the learner practise what they've already studied and gently introduce new things.\n\n` +
+      `LEARNER CONTEXT:\n${learnerCtx}\n\n` +
+      `STYLE:\n` +
+      `- Reply mostly in ${langName}, calibrated to the learner's level.\n` +
+      `- For any word the learner is unlikely to know, follow it with a short English gloss in parentheses, e.g. "rápido (fast)".\n` +
+      `- Keep responses 1–4 sentences unless they explicitly ask for an explanation.\n` +
+      `- If they ask "how does X work?" give a short, concrete grammar tip (3–5 bullets max).\n` +
+      `- If they ask to practise, give a tiny exercise (one sentence to translate, or fill in a blank) and wait for their answer.`;
+
+    const trimmed = (prevHistory || []).slice(-8).map(m => ({
+      role: m.role === 'bot' ? 'assistant' : 'user',
+      content: m.text,
+    }));
+    const messages = [
+      { role: 'system', content: system },
+      ...trimmed,
+      { role: 'user', content: userText },
+    ];
+    return await AI.chat(messages, { temperature: 0.7, maxTokens: 400 });
+  }
+
   function bindChatEvents() {
     const input = document.getElementById('chat-input');
     const sendBtn = document.getElementById('btn-chat-send');
@@ -541,15 +569,41 @@ const Chatbot = (() => {
 
       const history = getHistory();
       history.push({ role: 'user', text, ts: Date.now() });
-
-      // Generate response
-      const response = generateResponse(text);
-      history.push({ role: 'bot', text: response, ts: Date.now() });
       saveHistory(history);
-
-      // Re-render messages
       renderMessages(history);
       scrollToBottom();
+
+      // If AI is configured, route through OpenAI with learner context for
+      // guided responses. Otherwise fall back to the rule-based system.
+      if (typeof AI !== 'undefined' && AI.isEnabled()) {
+        // Show a "typing" placeholder
+        const typingHist = [...history, { role: 'bot', text: '…', ts: Date.now(), pending: true }];
+        renderMessages(typingHist);
+        scrollToBottom();
+
+        _aiReply(text, history).then(reply => {
+          const h = getHistory();
+          h.push({ role: 'bot', text: reply, ts: Date.now() });
+          saveHistory(h);
+          renderMessages(h);
+          scrollToBottom();
+        }).catch(err => {
+          console.warn('AI reply failed, falling back to rule-based:', err);
+          const fallback = generateResponse(text);
+          const h = getHistory();
+          h.push({ role: 'bot', text: fallback, ts: Date.now() });
+          saveHistory(h);
+          renderMessages(h);
+          scrollToBottom();
+        });
+      } else {
+        const response = generateResponse(text);
+        const h = getHistory();
+        h.push({ role: 'bot', text: response, ts: Date.now() });
+        saveHistory(h);
+        renderMessages(h);
+        scrollToBottom();
+      }
     }
 
     sendBtn?.addEventListener('click', sendMessage);

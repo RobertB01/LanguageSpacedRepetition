@@ -70,5 +70,13 @@ const Cloud = (() => {
     }
   }
 
-  return { init, isEnabled, load, save };
+  // Copy one profile's data to another (e.g. prod → dev sandbox).
+  async function copyProfile(fromId, toId) {
+    if (!enabled) return false;
+    const result = await load(fromId);
+    if (!result || !result.payload) return false;
+    return await save(toId, result.payload);
+  }
+
+  return { init, isEnabled, load, save, copyProfile };
 })();

@@ -1454,6 +1454,20 @@ const App = (() => {
       container.innerHTML = Chatbot.renderChat();
       Chatbot.bindChatEvents();
     },
+    showReading: () => {
+      currentView = 'read';
+      updateNav();
+      const container = document.getElementById('main-content');
+      container.innerHTML = Reading.render();
+      Reading.bind();
+    },
+    showReference: () => {
+      currentView = 'reference';
+      updateNav();
+      const container = document.getElementById('main-content');
+      container.innerHTML = Reference.render();
+      Reference.bind();
+    },
     showGames: () => {
       currentView = 'games';
       updateNav();
