@@ -6,7 +6,6 @@ progress.json
 
 # OpenAI key — copy openai-config.example.js to openai-config.js and fill in.
 # Never commit the real key.
-openai-config.js
 
 # OS / editor cruft
 .DS_Store
