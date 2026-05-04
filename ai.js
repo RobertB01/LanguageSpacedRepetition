@@ -66,22 +66,58 @@ const AI = (() => {
     return data.choices?.[0]?.message?.content ?? '';
   }
 
+  // CEFR baseline descriptions — what the learner can already do at each
+  // self-reported level, so the AI doesn't drop them back to "hola/adiós"
+  // when their SRS data is still sparse.
+  const LEVEL_DESCRIPTIONS = {
+    beginner: 'Absolute beginner. No prior Spanish. Use very simple words and lots of English glosses.',
+    a1: 'Approximately A1. Already knows ~500 high-frequency words: greetings, numbers, days, family, ser/estar/tener/ir/hacer in present tense, basic questions (qué, dónde, cómo). Can form simple sentences. Do NOT explain words like hola, gracias, sí, no, casa, ser, estar, tener, ir.',
+    a2: 'Approximately A2. Knows ~1000 words across daily-life topics, can use present + simple past + near future (ir a + inf), basic adjectives, and common phrases. Comfortable with most everyday vocabulary. Skip beginner-level explanations.',
+    b1: 'Approximately B1. Comfortable with present, all past tenses (pretérito + imperfecto), future, conditional, and present subjunctive in common contexts. ~2000 words including abstract concepts. Can hold conversations on familiar topics, read short articles. Treat as conversational partner.',
+    b2: 'Approximately B2. Solid grammar including most subjunctive uses, perfect tenses, passive voice. ~4000 words. Comfortable with idioms, opinion pieces, and nuanced discussions. Speak naturally without hand-holding.',
+  };
+
   // Convenience: build a system prompt that tells the model the user's level.
   function buildLearnerContext(opts = {}) {
     const limit = opts.limit ?? 40;
     if (typeof SRS === 'undefined' || typeof VOCABULARY === 'undefined') return '';
+
+    const settings = SRS.getSettings();
+    const level = (settings.baselineLevel || 'a1').toLowerCase();
+    const levelDesc = LEVEL_DESCRIPTIONS[level] || LEVEL_DESCRIPTIONS.a1;
 
     const known = SRS.getKnownWords(VOCABULARY).map(w => w.es).slice(0, limit);
     const struggling = SRS.getStrugglingWords(VOCABULARY)
       .map(s => s.word.es).slice(0, 10);
     const stats = SRS.getComputedStats(VOCABULARY);
 
+    // Anything the learner has been exposed to at least once, even if not
+    // yet mastered. This is what the user actually means when they ask
+    // "which words have I had?" — the AI should know about these even
+    // though they haven't graduated to "known" status yet.
+    const allProgress = SRS.getAllProgress();
+    const seenIds = new Set();
+    for (const key of Object.keys(allProgress)) {
+      const m = key.match(/^(\d+)_/);
+      if (m) seenIds.add(Number(m[1]));
+    }
+    const seenWords = VOCABULARY
+      .filter(w => seenIds.has(w.id))
+      .map(w => w.es);
+    const totalSeen = seenWords.length;
+
     const parts = [];
-    parts.push(`The learner is studying Spanish. Estimated active vocabulary: ${stats.estimatedVocab} words.`);
-    if (known.length) parts.push(`Words they know well (use these freely): ${known.join(', ')}.`);
+    parts.push(`SELF-REPORTED LEVEL: ${level.toUpperCase()}. ${levelDesc}`);
+    parts.push(`SRS DATA: exposed to ${totalSeen} distinct words across ${stats.totalReviews ?? 0} reviews. Estimated active vocabulary from SRS alone: ${stats.estimatedVocab} words. (The real total is higher — trust the self-reported level above when SRS is sparse.)`);
+    if (seenWords.length) {
+      const sample = seenWords.slice(-limit);
+      parts.push(`Words they have practised in this app (assume familiarity): ${sample.join(', ')}.`);
+    }
+    if (known.length) parts.push(`Words mastered in SRS — interval >= 7 days: ${known.join(', ')}.`);
     if (struggling.length) parts.push(`Words they struggle with (gently reinforce, don't avoid): ${struggling.join(', ')}.`);
     parts.push(`Daily streak: ${stats.dailyStreak}. Mastered: ${stats.totalMastered}.`);
-    parts.push(`Speak Spanish at their level. When introducing new words, briefly gloss them in English in parentheses. Keep replies short and conversational unless asked to explain.`);
+    parts.push(`IMPORTANT: Calibrate to the SELF-REPORTED LEVEL above, not just SRS counts. Never tell the learner they "just started", have "0 words", or suggest absolute beginner words (hola, adiós, gracias) unless their level is "beginner". If asked which words they've had, refer to the practised list above.`);
+    parts.push(`Speak Spanish at their level. When introducing words above their level, briefly gloss them in English in parentheses. Keep replies short and conversational unless asked to explain.`);
     return parts.join('\n');
   }
 

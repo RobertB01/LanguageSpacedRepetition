@@ -1284,6 +1284,18 @@ const App = (() => {
         </div>
 
         <div class="setting-group">
+          <label class="setting-label">Mijn niveau (voor AI tutor)</label>
+          <p class="setting-hint">De chat past zijn taalgebruik hierop aan, ook voordat je veel woorden hebt geoefend.</p>
+          <div class="setting-control speed-buttons">
+            <button class="btn btn-small level-btn ${settings.baselineLevel === 'beginner' ? 'active' : ''}" data-level="beginner">Beginner</button>
+            <button class="btn btn-small level-btn ${settings.baselineLevel === 'a1' ? 'active' : ''}" data-level="a1">A1</button>
+            <button class="btn btn-small level-btn ${settings.baselineLevel === 'a2' ? 'active' : ''}" data-level="a2">A2</button>
+            <button class="btn btn-small level-btn ${settings.baselineLevel === 'b1' ? 'active' : ''}" data-level="b1">B1</button>
+            <button class="btn btn-small level-btn ${settings.baselineLevel === 'b2' ? 'active' : ''}" data-level="b2">B2</button>
+          </div>
+        </div>
+
+        <div class="setting-group">
           <label class="setting-label">Data</label>
           <div class="setting-control data-buttons">
             <button class="btn btn-secondary" id="btn-export">Export</button>
@@ -1319,6 +1331,15 @@ const App = (() => {
         document.querySelectorAll('.speed-buttons .btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         settings.speechSpeed = btn.dataset.speed;
+        SRS.saveSettings(settings);
+      });
+    });
+
+    document.querySelectorAll('.level-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        settings.baselineLevel = btn.dataset.level;
         SRS.saveSettings(settings);
       });
     });

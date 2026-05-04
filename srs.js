@@ -57,6 +57,10 @@ const SRS = (() => {
     autoPronounce: true,
     speechSpeed: 'normal',
     studyMode: 'mixed',
+    // Self-reported CEFR baseline. Used to calibrate the AI tutor when SRS
+    // data alone is sparse (e.g. early on, before words have graduated to
+    // "known" status). One of: 'beginner', 'a1', 'a2', 'b1', 'b2'.
+    baselineLevel: 'a1',
   };
 
   // --- Sync (Cloud + optional local server) ---
